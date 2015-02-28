@@ -1,0 +1,3 @@
+#cmakedefine PLATFORM_WIN32
+
+#cmakedefine PLATFORM_LINUX
