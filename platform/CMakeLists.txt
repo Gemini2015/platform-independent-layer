@@ -14,7 +14,7 @@ set(PLATFORM_SRC
 elseif(UNIX)
 
 set(PLATFORM_SRC
-	""
+	"linux/PILTime.cpp"
 	)
 
 endif()
