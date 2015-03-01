@@ -4,8 +4,6 @@
 // platform define
 #include "config.h"
 
-#undef PLATFORM_WIN32
-
 #if defined(PLATFORM_WIN32)
 
 #include <windows.h>
