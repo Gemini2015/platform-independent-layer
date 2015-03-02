@@ -1,48 +1,53 @@
 #include "PILTime.h"
 #include <algorithm>
 
-PILTimer::PILTimer()
-{
-	Reset();
-}
-
-PILTimer::~PILTimer()
+namespace PIL
 {
 
-}
+	PILTimer::PILTimer()
+	{
+		Reset();
+	}
 
-void PILTimer::Reset()
-{
-	// QueryPerformanceCounter(&m_StartTime);
-	// m_StartTick = GetTickCount();
+	PILTimer::~PILTimer()
+	{
 
-	// m_LastTime = 0;
-}
+	}
 
-uint32 PILTimer::getMillisecondTime()
-{
-	// LARGE_INTEGER frequency;
-	// QueryPerformanceFrequency(&frequency);
+	void PILTimer::Reset()
+	{
+		// QueryPerformanceCounter(&m_StartTime);
+		// m_StartTick = GetTickCount();
 
-	// LARGE_INTEGER endTime;
-	// QueryPerformanceCounter(&endTime);
+		// m_LastTime = 0;
+	}
 
-	// LONGLONG TimeOffset = endTime.QuadPart - m_StartTime.QuadPart;
+	uint32 PILTimer::GetMillisecondTime()
+	{
+		// LARGE_INTEGER frequency;
+		// QueryPerformanceFrequency(&frequency);
 
-	// unsigned long Ticks = (unsigned long)(1000 * TimeOffset / frequency.QuadPart);
+		// LARGE_INTEGER endTime;
+		// QueryPerformanceCounter(&endTime);
 
-	// unsigned long check = GetTickCount() - m_StartTick;
-	// signed long msecOff = (signed long)(Ticks - check);
-	// if (msecOff < -100 || msecOff > 100)
-	// {
-	// 	LONGLONG adjust = (std::min)(msecOff * frequency.QuadPart / 1000, TimeOffset - m_LastTime);
-	// 	m_StartTime.QuadPart += adjust;
-	// 	TimeOffset -= adjust;
+		// LONGLONG TimeOffset = endTime.QuadPart - m_StartTime.QuadPart;
 
-	// 	Ticks = (unsigned long)(1000 * TimeOffset / frequency.QuadPart);
-	// }
+		// unsigned long Ticks = (unsigned long)(1000 * TimeOffset / frequency.QuadPart);
 
-	// m_LastTime = TimeOffset;
+		// unsigned long check = GetTickCount() - m_StartTick;
+		// signed long msecOff = (signed long)(Ticks - check);
+		// if (msecOff < -100 || msecOff > 100)
+		// {
+		// 	LONGLONG adjust = (std::min)(msecOff * frequency.QuadPart / 1000, TimeOffset - m_LastTime);
+		// 	m_StartTime.QuadPart += adjust;
+		// 	TimeOffset -= adjust;
 
-	// return Ticks;
+		// 	Ticks = (unsigned long)(1000 * TimeOffset / frequency.QuadPart);
+		// }
+
+		// m_LastTime = TimeOffset;
+
+		// return Ticks;
+	}
+
 }
