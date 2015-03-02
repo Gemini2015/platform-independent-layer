@@ -26,9 +26,9 @@ typedef unsigned short uint16;
 // 2 byte signed
 typedef signed short int16;
 // 4 byte unsigned
-typedef unsigned long uint32;
+typedef unsigned int uint32;
 // 4 byte signed
-typedef long int32;
+typedef int int32;
 // 8 byte unsigned
 typedef unsigned long long uint64;
 // 8 byte signed
