@@ -22,7 +22,7 @@ namespace PIL
 		m_LastTime = 0;
 	}
 
-	uint32 PILTimer::getMillisecondTime()
+	uint32 PILTimer::GetMillisecondTime()
 	{
 		LARGE_INTEGER frequency;
 		QueryPerformanceFrequency(&frequency);

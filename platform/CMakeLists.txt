@@ -3,12 +3,14 @@ project(platform)
 set(PLATFORM_INC
 	"PILPrerequisites.h"
 	"PILTime.h"
+	"PILFileSystem.h"
 	)
 
 if(WIN32)
 
 set(PLATFORM_SRC
 	"win32/PILTime.cpp"
+	"win32/PILFileSystem.cpp"
 	)
 
 elseif(UNIX)

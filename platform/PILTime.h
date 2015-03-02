@@ -13,7 +13,7 @@ namespace PIL
 		~PILTimer();
 
 		void Reset();
-		uint32 getMillisecondTime();
+		uint32 GetMillisecondTime();
 
 	protected:
 
