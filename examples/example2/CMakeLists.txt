@@ -1,6 +1,6 @@
-# project(example1)
+# project(example2)
 
-set(EXAMPLE_NAME "example1")
+set(EXAMPLE_NAME "example2")
 
 set(SRC_LIST
 	"main.cpp"

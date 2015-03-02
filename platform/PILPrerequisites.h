@@ -81,6 +81,10 @@ typedef int32 HRESULT;
 
 #endif // ! Win32 HRESULT
 
-
+namespace PIL
+{
+	class PILTimer;
+	class FileSystem;
+}
 
 #endif // !_PIL_PRE_REQ_H_

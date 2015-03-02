@@ -40,7 +40,7 @@ namespace PIL
 		inline bool IsRelativePath(const std::string path)
 		{
 			if (path.empty())
-				return false;
+				return true;
 #if defined(PLATFORM_WIN32)
 			if (isalpha(uint8(path[0])) && path[1] == ':')
 				return false;
@@ -86,7 +86,7 @@ namespace PIL
 
 		HRESULT RenameDir(const std::string oldname, const std::string newname);
 
-		HRESULT GetFileList(const std::string path, FileInfo_Vec *filelist, const std::string filter = "");
+		HRESULT GetFileList(const std::string path, FileInfo_Vec *filelist, bool recursive = false, const std::string filter = "*.*");
 	};
 }
 

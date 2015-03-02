@@ -41,14 +41,13 @@ namespace PIL
 		return hr;
 	}
 
-	HRESULT FileSystem::GetFileList(const std::string path, FileInfo_Vec *filelist, const std::string filter /*= ""*/)
+	HRESULT FileSystem::GetFileList(const std::string path, FileInfo_Vec *filelist, bool recursive /*= false*/, const std::string filter /*= "*.*"*/)
 	{
-		if (path.empty())
-			return E_INVALIDARG;
+		/*if (path.empty())
+			return E_INVALIDARG;*/
 		if (filelist == NULL)
 			return E_INVALIDARG;
-		if (!IsFileOrDirExist(path))
-			return E_INVALIDARG;
+		
 
 		struct _finddata_t filedata;
 		intptr_t hFile;
@@ -56,17 +55,20 @@ namespace PIL
 		FilePath_Vec pathlist;
 		
 		std::string fpath = RelativeToAbsPath(path);
-		if (!fpath.empty())
+		if (!IsFileOrDirExist(fpath))
+			return E_INVALIDARG;
+		if (fpath.empty())
 			return E_FAIL;
 		pathlist.push_back(fpath);
 		
 
-		while (pathlist.empty())
+		while (!pathlist.empty())
 		{
 			std::string tpath = pathlist.front();
 			pathlist.erase(pathlist.begin());
 
-			_chdir(tpath.c_str());
+			if(_chdir(tpath.c_str()) != 0)
+				continue;
 
 			hFile = _findfirst(filter.c_str(), &filedata);
 			if (hFile == -1)
@@ -86,12 +88,12 @@ namespace PIL
 
 				filelist->push_back(info);
 
-				if (filedata.attrib & _A_SUBDIR)
+				if (recursive && filedata.attrib & _A_SUBDIR)
 				{
 					fpath = RelativeToAbsPath(std::string(filedata.name));
 					if (!fpath.empty())
 					{
-						pathlist.push_back(std::string(filedata.name));
+						pathlist.push_back(std::string(fpath));
 					}
 				}
 
