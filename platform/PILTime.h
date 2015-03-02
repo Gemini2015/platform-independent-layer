@@ -3,28 +3,33 @@
 
 #include "PILPrerequisites.h"
 
-class PILTimer
+namespace PIL
 {
-public:
-	PILTimer();
-	~PILTimer();
 
-	void Reset();
-	uint32 getMillisecondTime();
+	class PILTimer
+	{
+	public:
+		PILTimer();
+		~PILTimer();
 
-protected:
+		void Reset();
+		uint32 getMillisecondTime();
+
+	protected:
 
 #if defined(PLATFORM_WIN32)
-	
-	LARGE_INTEGER m_StartTime;
-	DWORD m_StartTick;
-	LONGLONG m_LastTime;
+
+		LARGE_INTEGER m_StartTime;
+		DWORD m_StartTick;
+		LONGLONG m_LastTime;
 
 #elif defined(PLATFORM_LINUX) 
 
 
 #endif
 
-};
+	};
+
+}
 
 #endif
