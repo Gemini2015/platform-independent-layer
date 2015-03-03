@@ -12,7 +12,9 @@
 
 #elif defined(PLATFORM_LINUX)
 
+#include <limits.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #endif
 
@@ -75,6 +77,10 @@ namespace PIL
 					return std::string(buf);
 				else return "";
 #else
+				char buf[260];
+				if(realpath(relpath.c_str(), buf) != NULL)
+					return std::string(buf);
+				else return "";
 #endif
 			}
 			else return relpath;

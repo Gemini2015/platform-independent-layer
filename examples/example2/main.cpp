@@ -11,6 +11,7 @@ int main(int argc, char** argv)
 	{
 		path.assign(argv[1]);
 	}
+	else path.assign(".");
 	if (argc >= 3)
 	{
 		if (strcmp(argv[2], "-r") == 0)
@@ -25,9 +26,9 @@ int main(int argc, char** argv)
 
 	fs->GetFileList(path, &filelist, recursive);
 
-	if (path.empty())
+	if (path.compare(".") == 0)
 	{
-		std::cout << "Files in current directory :\n";
+		std::cout << "\nFiles in current directory :\n";
 	}
 	else
 	{
