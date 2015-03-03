@@ -16,38 +16,19 @@ namespace PIL
 
 	void PILTimer::Reset()
 	{
-		// QueryPerformanceCounter(&m_StartTime);
-		// m_StartTick = GetTickCount();
-
-		// m_LastTime = 0;
+		gettimeofday(&m_StartTime, NULL);
 	}
 
 	uint32 PILTimer::GetMillisecondTime()
 	{
-		// LARGE_INTEGER frequency;
-		// QueryPerformanceFrequency(&frequency);
+		timeval endTime;
+		gettimeofday(&endTime, NULL);
 
-		// LARGE_INTEGER endTime;
-		// QueryPerformanceCounter(&endTime);
+		// timeval 由 tv_sec(秒)， tv_usec(微秒) 共同组成
+		unsigned long elapsedTime = (endTime.tv_sec - m_StartTime.tv_sec) * 1000;
+		elapsedTime += (endTime.tv_usec - m_StartTime.tv_usec) / 1000;
 
-		// LONGLONG TimeOffset = endTime.QuadPart - m_StartTime.QuadPart;
-
-		// unsigned long Ticks = (unsigned long)(1000 * TimeOffset / frequency.QuadPart);
-
-		// unsigned long check = GetTickCount() - m_StartTick;
-		// signed long msecOff = (signed long)(Ticks - check);
-		// if (msecOff < -100 || msecOff > 100)
-		// {
-		// 	LONGLONG adjust = (std::min)(msecOff * frequency.QuadPart / 1000, TimeOffset - m_LastTime);
-		// 	m_StartTime.QuadPart += adjust;
-		// 	TimeOffset -= adjust;
-
-		// 	Ticks = (unsigned long)(1000 * TimeOffset / frequency.QuadPart);
-		// }
-
-		// m_LastTime = TimeOffset;
-
-		// return Ticks;
+		return elapsedTime;
 	}
 
 }

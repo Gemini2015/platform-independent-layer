@@ -3,6 +3,12 @@
 
 #include "PILPrerequisites.h"
 
+#if defined(PLATFORM_LINUX)
+
+#include <sys/time.h>
+
+#endif
+
 namespace PIL
 {
 
@@ -24,7 +30,7 @@ namespace PIL
 		LONGLONG m_LastTime;
 
 #elif defined(PLATFORM_LINUX) 
-
+		struct timeval m_StartTime;
 
 #endif
 
