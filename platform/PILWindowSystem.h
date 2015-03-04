@@ -3,9 +3,6 @@
 
 #include "PILPrerequisites.h"
 
-#include <string>
-#include <map>
-
 namespace PIL
 {
 	class Window
@@ -15,15 +12,15 @@ namespace PIL
 		enum WindowStatus
 		{
 			WS_None = 0,
-			WS_Show,
 			WS_Hide,
+			WS_Show,
 			WS_Destoryed,
 		};
 
 	public:
 
 	private:
-		Window(std::string name, int32 x, int32 y, uint32 width, uint32 height);
+		Window(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param);
 		~Window();
 
 		HRESULT Create();
@@ -34,12 +31,15 @@ namespace PIL
 		uint32 mID;
 		WindowStatus mStatus;
 		std::string mName;
+		int32 mLeft;
+		int32 mTop;
 		uint32 mWidth;
 		uint32 mHeight;
+		NameValue_Map mParamList;
 
 #if defined(PLATFORM_WIN32)
-		HINSTANCE mInstance;
-		HWND mWnd;
+		HINSTANCE mHInstance;
+		HWND mHWnd;
 #else
 #endif
 
@@ -61,7 +61,7 @@ namespace PIL
 			}
 		}
 
-		HRESULT CreateWindow(std::string name, int32 x, int32 y, uint32 width, uint32 height, Window** ppWindow)
+		HRESULT NewWindow(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param, Window** ppWindow)
 		{
 			if (name.empty() || width < 0 || height < 0 || ppWindow == NULL)
 				return E_INVALIDARG;
@@ -72,7 +72,7 @@ namespace PIL
 				return S_FALSE;
 			}
 
-			Window* window = new Window(name, x, y, width, height);
+			Window* window = new Window(name, x, y, width, height, param);
 			if (window == NULL)
 				return E_OUTOFMEMORY;
 
