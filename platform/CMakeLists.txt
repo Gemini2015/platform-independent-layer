@@ -1,3 +1,7 @@
+project(platform)
+
+set(PLATFORM_INC
+    "PILPrerequisites.h"
 	"PILInclude.h"
 	"PILTime.h"
 	"PILFileSystem.h"
