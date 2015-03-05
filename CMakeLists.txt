@@ -11,6 +11,9 @@ elseif(UNIX)
 
 set(PLATFORM_LINUX ON)
 
+# Use C++11 in linux
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
+
 endif()
 
 configure_file(
