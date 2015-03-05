@@ -102,6 +102,27 @@ namespace PIL
 
 	typedef std::map<std::string, std::string> NameValue_Map;
 
+	typedef struct Vector2I_t
+	{
+		union
+		{
+			struct
+			{
+				int32 x;
+				int32 y;
+			};
+			struct
+			{
+				int32 width;
+				int32 height;
+			};
+		};
+		Vector2I_t(int32 x, int32 y) :x(x), y(y){}
+	}Vector2I;
+
+	typedef Vector2I Point;
+	typedef Vector2I Size;
+
 	class PILTimer;
 	class FileSystem;
 	class Window;

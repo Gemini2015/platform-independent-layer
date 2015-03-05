@@ -5,5 +5,6 @@
 
 #include "PILTime.h"
 #include "PILFileSystem.h"
+#include "PILWindowSystem.h"
 
 #endif
