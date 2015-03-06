@@ -21,8 +21,10 @@ elseif(UNIX)
 set(PLATFORM_SRC
 	"linux/PILTime.cpp"
 	"linux/PILFileSystem.cpp"
+	"linux/PILWindowSystem.cpp"
 	)
 
 endif()
 
 add_library(${PROJECT_NAME} STATIC ${PLATFORM_INC} ${PLATFORM_SRC})
+target_link_libraries(${PROJECT_NAME} ${SYS_LIB_LIST})

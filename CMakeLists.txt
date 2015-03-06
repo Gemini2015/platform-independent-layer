@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(platform-independent-layer)
 
+set(SYS_LIB_LIST "")
+
 # platform config
 if(WIN32)
 
@@ -13,6 +15,10 @@ set(PLATFORM_LINUX ON)
 
 # Use C++11 in linux
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
+
+link_directories(/usr/include/X11)
+
+SET(SYS_LIB_LIST ${SYS_LIB_LIST} "X11")
 
 endif()
 

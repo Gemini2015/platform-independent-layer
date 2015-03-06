@@ -2,6 +2,7 @@
 #define _PIL_WINDOW_SYSTEM_H_
 
 #include "PILPrerequisites.h"
+#include <X11/Xlib.h>
 
 namespace PIL
 {
@@ -85,6 +86,9 @@ namespace PIL
 	public:
 		static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #else
+		static Display *sDisplay;
+		static int32 sDisplayRefCount;
+		::Window mWindow;
 #endif
 
 	private:
