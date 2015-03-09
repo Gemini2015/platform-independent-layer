@@ -55,6 +55,8 @@ namespace PIL
 
 		XStoreName(sDisplay, mWindow, mTitle.c_str());
 
+		XSelectInput(sDisplay, mWindow, StructureNotifyMask | VisibilityChangeMask | FocusChangeMask | ExposureMask);
+
 		XUnmapWindow(sDisplay, mWindow);
 		mStatus = WS_Hide;
 
@@ -108,7 +110,7 @@ namespace PIL
 		XEvent event;
 
 		while (XCheckWindowEvent(sDisplay, mWindow,
-				StructureNotifyMask | ExposureMask,
+				StructureNotifyMask | VisibilityChangeMask | FocusChangeMask | ExposureMask,
 				&event))
 		{
 			switch(event.type)
@@ -144,6 +146,27 @@ namespace PIL
 				}
 				break;
 			}
+			case FocusIn:
+			{
+				if(mWindowManager)
+				{
+					mWindowManager->ChangeActiveWindow(this, true);
+				}
+			}
+			case FocusOut:
+			{
+				if(mWindowManager)
+				{
+					mWindowManager->ChangeActiveWindow(this, false);
+				}
+			}
+			case ConfigureNotify:
+			{
+				if(mWindowManager)
+				{
+					mWindowManager->MoveOrResizeWindow(this);
+				}
+			}
 			default:
 				break;
 			}
@@ -172,14 +195,28 @@ namespace PIL
 		if (bActive)
 		{
 			mStatus = WS_Show;
-			printf("%s Active\n", mName.c_str());
 		}
 		mIsActive = bActive;
 	}
 
 	void Window::OnMoveOrResize(Window *w)
 	{
-
+		if(this == w)
+		{
+			XWindowAttributes attr;
+			::Window root, parent, *pchild = NULL, child;
+			uint32 nchild = 0;
+			int ox = 0, oy = 0;
+			XQueryTree(sDisplay, mWindow, &root, &parent, &pchild, &nchild);
+			XTranslateCoordinates(sDisplay, mWindow, root, 0, 0, &ox, &oy, &child);
+			if(XGetWindowAttributes(sDisplay, mWindow, &attr))
+			{
+				mLeft = ox - attr.x;
+				mTop = oy - attr.y;
+				mWidth = attr.width;
+				mHeight = attr.height;
+			}
+		}
 	}
 
 }
