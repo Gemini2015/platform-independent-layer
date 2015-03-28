@@ -4,22 +4,22 @@
 namespace PIL
 {
 
-	PILTimer::PILTimer()
+	Timer::Timer()
 	{
 		Reset();
 	}
 
-	PILTimer::~PILTimer()
+	Timer::~Timer()
 	{
 
 	}
 
-	void PILTimer::Reset()
+	void Timer::Reset()
 	{
 		gettimeofday(&m_StartTime, NULL);
 	}
 
-	uint32 PILTimer::GetMillisecondTime()
+	uint32 Timer::GetMillisecondTime()
 	{
 		timeval endTime;
 		gettimeofday(&endTime, NULL);

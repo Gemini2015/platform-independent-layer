@@ -12,11 +12,11 @@
 namespace PIL
 {
 
-	class PILTimer
+	class Timer
 	{
 	public:
-		PILTimer();
-		~PILTimer();
+		Timer();
+		~Timer();
 
 		void Reset();
 		uint32 GetMillisecondTime();

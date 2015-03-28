@@ -2,7 +2,12 @@
 #define _PIL_WINDOW_SYSTEM_H_
 
 #include "PILPrerequisites.h"
+
+#if defined(PLATFORM_LINUX)
+
 #include <X11/Xlib.h>
+
+#endif
 
 namespace PIL
 {

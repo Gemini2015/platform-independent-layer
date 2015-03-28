@@ -4,17 +4,17 @@
 namespace PIL
 {
 
-	PILTimer::PILTimer()
+	Timer::Timer()
 	{
 		Reset();
 	}
 
-	PILTimer::~PILTimer()
+	Timer::~Timer()
 	{
 
 	}
 
-	void PILTimer::Reset()
+	void Timer::Reset()
 	{
 		QueryPerformanceCounter(&m_StartTime);
 		m_StartTick = GetTickCount();
@@ -22,7 +22,7 @@ namespace PIL
 		m_LastTime = 0;
 	}
 
-	uint32 PILTimer::GetMillisecondTime()
+	uint32 Timer::GetMillisecondTime()
 	{
 		LARGE_INTEGER frequency;
 		QueryPerformanceFrequency(&frequency);

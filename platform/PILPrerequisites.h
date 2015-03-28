@@ -123,7 +123,7 @@ namespace PIL
 	typedef Vector2I Point;
 	typedef Vector2I Size;
 
-	class PILTimer;
+	class Timer;
 	class FileSystem;
 	class Window;
 	class WindowManager;
