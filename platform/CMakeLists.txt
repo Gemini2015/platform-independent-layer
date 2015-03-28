@@ -3,6 +3,7 @@ project(platform)
 set(PLATFORM_INC
     "PILPrerequisites.h"
 	"PILInclude.h"
+	"PILRoot.h"
 	"PILTime.h"
 	"PILFileSystem.h"
 	"PILWindowSystem.h"
