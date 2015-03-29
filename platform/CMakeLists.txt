@@ -29,3 +29,20 @@ endif()
 
 add_library(${PROJECT_NAME} STATIC ${PLATFORM_INC} ${PLATFORM_SRC})
 target_link_libraries(${PROJECT_NAME} ${SYS_LIB_LIST})
+
+foreach(lib_file platform)
+	install(TARGETS ${lib_file}
+		RUNTIME DESTINATION lib
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib)
+endforeach()
+
+install(FILES
+	${CMAKE_BINARY_DIR}/config.h
+	PILPrerequisites.h
+	PILInclude.h
+	PILRoot.h
+	PILFileSystem.h
+	PILTime.h
+	PILWindowSystem.h
+	DESTINATION include)

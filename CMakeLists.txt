@@ -8,10 +8,12 @@ set(SYS_LIB_LIST "")
 if(WIN32)
 
 set(PLATFORM_WIN32 ON)
+set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/deploy/win32" CACHE PATH "Project install directory" FORCE)
 
 elseif(UNIX)
 
 set(PLATFORM_LINUX ON)
+set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/deploy/linux" CACHE PATH "Project install directory" FORCE)
 
 # Use C++11 in linux
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
