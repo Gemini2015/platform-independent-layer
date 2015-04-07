@@ -1,4 +1,5 @@
-#include "PILWindowSystem.h"
+#include "PILWindow.h"
+#include "PILWindowManager.h"
 
 namespace PIL
 {
@@ -13,10 +14,11 @@ namespace PIL
 		mTop = y;
 		mWidth = width;
 		mHeight = height;
-		if(param) mParamList = *param;
+		if (param) mParamList = *param;
 		mWindowManager = NULL;
 		mIsActive = false;
 		mIsFullScreen = false;
+		mIsClosed = true;
 	}
 
 	Window::~Window()
@@ -61,6 +63,7 @@ namespace PIL
 		}
 
 		mStatus = WS_Hide;
+		mIsClosed = false;
 		return S_OK;
 	}
 
@@ -75,6 +78,7 @@ namespace PIL
 		mStatus = WS_Destoryed;
 		mIsActive = false;
 		mIsFullScreen = false;
+		mIsClosed = true;
 		return S_OK;
 	}
 
@@ -85,7 +89,17 @@ namespace PIL
 			return true;
 		if (mHWnd != NULL)
 		{
-			::ShowWindow(mHWnd, SW_SHOW);
+			if (bShow)
+			{
+				::ShowWindow(mHWnd, SW_SHOW);
+				mStatus = WS_Show;
+				mIsActive = true;
+			}
+			else
+			{
+				mStatus = WS_Hide;
+				mIsActive = false;
+			}
 			return true;
 		}
 		else return false;
@@ -174,6 +188,18 @@ namespace PIL
 			mStatus = WS_Hide;
 		}
 		mIsActive = bActive;
+
+		if (mIsFullScreen)
+		{
+			if (bActive == false)
+			{
+				::ShowWindow(mHWnd, SW_SHOWMINNOACTIVE);
+			}
+			else
+			{
+				::ShowWindow(mHWnd, SW_SHOWNORMAL);
+			}
+		}
 	}
 
 	void Window::OnMoveOrResize(Window *w)
@@ -193,6 +219,76 @@ namespace PIL
 				mHeight = rect.bottom - rect.top;
 			}
 		}
+	}
+
+	bool Window::IsVisible() const
+	{
+		return (mHWnd && !IsIconic(mHWnd));
+	}
+
+	void Window::SetHidden(bool hidden)
+	{
+		mIsHidden = hidden;
+		if (hidden)
+			::ShowWindow(mHWnd, SW_HIDE);
+		else
+			::ShowWindow(mHWnd, SW_SHOWNORMAL);
+	}
+
+	bool Window::IsActive()
+	{
+		if (IsFullScreen())
+			return IsVisible();
+
+		return mIsActive && IsVisible();
+	}
+
+	bool Window::IsHidden() const
+	{
+		return mIsHidden;
+	}
+
+	void Window::SetFullScreen(bool fullScreen, uint32 width, uint32 height)
+	{
+
+	}
+
+	bool Window::IsVSyncEnabled() const
+	{
+		return mIsVSync;
+	}
+
+	void Window::SetVSyncEnabled(bool vSync)
+	{
+		mIsVSync = vSync;
+		HDC old_hdc = wglGetCurrentDC();
+		HGLRC old_context = wglGetCurrentContext();
+		if (!wglMakeCurrent(mHDC, mGLRC))
+		{
+			// Log Error
+		}
+		if (old_context && old_context != mGLRC)
+		{
+			if (!wglMakeCurrent(old_hdc, old_context))
+			{
+				// Log Error
+			}
+		}
+	}
+
+	bool Window::IsClosed() const
+	{
+		return mIsClosed;
+	}
+
+	void Window::SwapBuffers(bool waitForVSync)
+	{
+		::SwapBuffers(mHDC);
+	}
+
+	bool Window::IsFullScreen() const
+	{
+		return mIsFullScreen;
 	}
 
 }

@@ -6,7 +6,8 @@ set(PLATFORM_INC
 	"PILRoot.h"
 	"PILTime.h"
 	"PILFileSystem.h"
-	"PILWindowSystem.h"
+	"PILWindow.h"
+	"PILWindowManager.h"
 	)
 
 if(WIN32)
@@ -14,7 +15,8 @@ if(WIN32)
 set(PLATFORM_SRC
 	"win32/PILTime.cpp"
 	"win32/PILFileSystem.cpp"
-	"win32/PILWindowSystem.cpp"
+	"win32/PILWindowManager.cpp"
+	"win32/PILWindow.cpp"
 	)
 
 elseif(UNIX)
@@ -44,5 +46,6 @@ install(FILES
 	PILRoot.h
 	PILFileSystem.h
 	PILTime.h
-	PILWindowSystem.h
+	PILWindow.h
+	PILWindowManager.h
 	DESTINATION include)

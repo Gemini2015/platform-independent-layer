@@ -12,7 +12,7 @@
 
 /************************************************************************/
 /* 
-	常用标准库
+	std library
 */
 /************************************************************************/
 #include <string>
@@ -22,7 +22,7 @@
 
 /************************************************************************/
 /*
-	原子数据类型定义
+	Atomic Data Types Define
 */
 /************************************************************************/
 
@@ -44,10 +44,14 @@ typedef unsigned long long uint64;
 // 8 byte signed
 typedef signed long long int64;
 
+// float
+typedef float float32;
+typedef double float64;
+
 
 /************************************************************************/
 /* 
-	返回值定义
+	Result Define for Linux
 */
 /************************************************************************/
 #if !defined(PLATFORM_WIN32) && !defined(PLATFORM_HRESULT_DEFINE) \
@@ -94,7 +98,7 @@ typedef int32 HRESULT;
 
 /************************************************************************/
 /* 
-	类声明
+	forward declaration
 */
 /************************************************************************/
 namespace PIL
@@ -127,6 +131,7 @@ namespace PIL
 	class FileSystem;
 	class Window;
 	class WindowManager;
+	class GLUtil;
 }
 
 #endif // !_PIL_PRE_REQ_H_
