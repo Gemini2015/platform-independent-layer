@@ -8,6 +8,7 @@ set(PLATFORM_INC
 	"PILFileSystem.h"
 	"PILWindow.h"
 	"PILWindowManager.h"
+	"PILGLUtil.h"
 	)
 
 if(WIN32)
@@ -17,7 +18,14 @@ set(PLATFORM_SRC
 	"win32/PILFileSystem.cpp"
 	"win32/PILWindowManager.cpp"
 	"win32/PILWindow.cpp"
+	"win32/PILGLUtil.cpp"
 	)
+
+
+set(SYS_LIB_LIST ${SYS_LIB_LIST}
+	"glew32.lib"
+	"glu32.lib"
+	"opengl32.lib")
 
 elseif(UNIX)
 
