@@ -32,7 +32,8 @@ elseif(UNIX)
 set(PLATFORM_SRC
 	"linux/PILTime.cpp"
 	"linux/PILFileSystem.cpp"
-	"linux/PILWindowSystem.cpp"
+	"linux/PILWindowManager.cpp"
+	"linux/PILWindow.cpp"
 	)
 
 endif()

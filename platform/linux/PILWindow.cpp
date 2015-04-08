@@ -1,9 +1,9 @@
-#include "PILWindowSystem.h"
-#include <string.h>
+#include "PILWindow.h"
+#include "PILWindowManager.h"
 
 namespace PIL
 {
-	uint32 Window::sWindowCounter = 0;
+uint32 Window::sWindowCounter = 0;
 	Display* Window::sDisplay = NULL;
 	int32 Window::sDisplayRefCount = 0;
 
@@ -218,5 +218,4 @@ namespace PIL
 			}
 		}
 	}
-
 }

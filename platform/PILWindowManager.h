@@ -3,12 +3,6 @@
 
 #include "PILPrerequisites.h"
 
-#if defined(PLATFORM_LINUX)
-
-#include <X11/Xlib.h>
-
-#endif
-
 #include "PILWindow.h"
 
 namespace PIL
