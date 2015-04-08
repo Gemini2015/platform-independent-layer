@@ -5,6 +5,7 @@
 
 #if defined(PLATFORM_LINUX)
 
+#include <X11/X.h>
 #include <X11/Xlib.h>
 
 #endif
@@ -116,6 +117,7 @@ namespace PIL
 		static Display *sDisplay;
 		static int32 sDisplayRefCount;
 		::Window mWindow;
+		Atom mAtomDeleteWindow;
 #endif
 
 	private:

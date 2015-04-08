@@ -53,6 +53,9 @@ uint32 Window::sWindowCounter = 0;
 		if(mWindow == 0L)
 			return E_FAIL;
 
+		mAtomDeleteWindow = XInternAtom(sDisplay, "WM_DELETE_WINDOW", false);
+		XSetWMProtocols(sDisplay, mWindow, &mAtomDeleteWindow, 1);
+
 		XStoreName(sDisplay, mWindow, mTitle.c_str());
 
 		XSelectInput(sDisplay, mWindow, StructureNotifyMask | VisibilityChangeMask | FocusChangeMask | ExposureMask);
@@ -152,6 +155,7 @@ uint32 Window::sWindowCounter = 0;
 				{
 					mWindowManager->ChangeActiveWindow(this, true);
 				}
+				break;
 			}
 			case FocusOut:
 			{
@@ -159,6 +163,7 @@ uint32 Window::sWindowCounter = 0;
 				{
 					mWindowManager->ChangeActiveWindow(this, false);
 				}
+				break;
 			}
 			case ConfigureNotify:
 			{
@@ -166,10 +171,20 @@ uint32 Window::sWindowCounter = 0;
 				{
 					mWindowManager->MoveOrResizeWindow(this);
 				}
-			}
-			default:
 				break;
 			}
+			default:break;
+			}
+		}
+
+		// XCheckWindowEvent doesn't receive ClientMessage
+		while(XCheckTypedWindowEvent(sDisplay, mWindow, ClientMessage, &event))
+		{
+			if((Atom)(event.xclient.data.l[0]) == mAtomDeleteWindow && mWindowManager != NULL)
+			{
+				mWindowManager->DeleteWindow(this);
+			}
+			break;
 		}
 	}
 
