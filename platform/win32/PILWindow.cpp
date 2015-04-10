@@ -23,7 +23,7 @@ namespace PIL
 
 	Window::~Window()
 	{
-		if (mStatus != WS_Destoryed)
+		if (mIsClosed == false)
 		{
 			Destory();
 		}
@@ -62,7 +62,6 @@ namespace PIL
 			return E_FAIL;
 		}
 
-		mStatus = WS_Hide;
 		mIsClosed = false;
 		return S_OK;
 	}
@@ -75,34 +74,10 @@ namespace PIL
 			mHWnd = NULL;
 		}
 		UnregisterClass("PILWindow", mHInstance);
-		mStatus = WS_Destoryed;
 		mIsActive = false;
 		mIsFullScreen = false;
 		mIsClosed = true;
 		return S_OK;
-	}
-
-	bool Window::ShowWindow(bool bShow)
-	{
-		if ((bShow == true && mStatus == WS_Show) ||
-			(bShow == false && mStatus == WS_Hide))
-			return true;
-		if (mHWnd != NULL)
-		{
-			if (bShow)
-			{
-				::ShowWindow(mHWnd, SW_SHOW);
-				mStatus = WS_Show;
-				mIsActive = true;
-			}
-			else
-			{
-				mStatus = WS_Hide;
-				mIsActive = false;
-			}
-			return true;
-		}
-		else return false;
 	}
 
 	LRESULT CALLBACK Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -158,48 +133,8 @@ namespace PIL
 		}
 	}
 
-	HRESULT Window::SetWindowTitle(std::string title)
-	{
-		if (mHWnd)
-		{
-			mTitle = title;
-			SetWindowText(mHWnd, mTitle.c_str());
-			return S_OK;
-		}
-		else return E_FAIL;
-	}
-
 	void Window::OnActiveChange(Window* w, bool bActive)
 	{
-		if (w == this)
-		{
-			SetActive(bActive);
-		}
-	}
-
-	void Window::SetActive(bool bActive)
-	{
-		if (bActive)
-		{
-			mStatus = WS_Show;
-		}
-		else
-		{
-			mStatus = WS_Hide;
-		}
-		mIsActive = bActive;
-
-		if (mIsFullScreen)
-		{
-			if (bActive == false)
-			{
-				::ShowWindow(mHWnd, SW_SHOWMINNOACTIVE);
-			}
-			else
-			{
-				::ShowWindow(mHWnd, SW_SHOWNORMAL);
-			}
-		}
 	}
 
 	void Window::OnMoveOrResize(Window *w)
@@ -221,21 +156,73 @@ namespace PIL
 		}
 	}
 
+	HRESULT Window::SetWindowTitle(std::string title)
+	{
+		if (mHWnd)
+		{
+			mTitle = title;
+			SetWindowText(mHWnd, mTitle.c_str());
+			return S_OK;
+		}
+		else return E_FAIL;
+	}
+
+	HRESULT Window::SetWindowPosition(int32 left, int32 top)
+	{
+		if (mHWnd && !mIsFullScreen)
+		{
+			SetWindowPos(mHWnd, 0, left, top, 0, 0,
+				SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+			return S_OK;
+		}
+		return E_FAIL;
+	}
+
+	HRESULT Window::SetWindowSize(uint32 width, uint32 height)
+	{
+		if (mHWnd && !mIsFullScreen)
+		{
+			RECT rc = { 0, 0, width, height };
+			AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW | WS_VISIBLE, false);
+			width = rc.right - rc.left;
+			height = rc.bottom - rc.top;
+			SetWindowPos(mHWnd, 0, 0, 0, width, height,
+				SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+			return S_OK;
+		}
+		return E_FAIL;
+	}
+
+	HRESULT Window::SetVisible(bool visible)
+	{
+		mIsVisible = visible;
+		return S_OK;
+	}
+
 	bool Window::IsVisible() const
 	{
 		return (mHWnd && !IsIconic(mHWnd));
 	}
 
-	void Window::SetHidden(bool hidden)
+	HRESULT Window::SetActive(bool active)
 	{
-		mIsHidden = hidden;
-		if (hidden)
-			::ShowWindow(mHWnd, SW_HIDE);
-		else
-			::ShowWindow(mHWnd, SW_SHOWNORMAL);
+		mIsActive = active;
+
+		if (mIsFullScreen)
+		{
+			if (active == false)
+			{
+				::ShowWindow(mHWnd, SW_SHOWMINNOACTIVE);
+			}
+			else
+			{
+				::ShowWindow(mHWnd, SW_SHOWNORMAL);
+			}
+		}
+		return S_OK;
 	}
 
-	bool Window::IsActive()
+	bool Window::IsActive() const
 	{
 		if (IsFullScreen())
 			return IsVisible();
@@ -243,22 +230,32 @@ namespace PIL
 		return mIsActive && IsVisible();
 	}
 
+	HRESULT Window::SetHidden(bool hidden)
+	{
+		mIsHidden = hidden;
+		if (hidden)
+			::ShowWindow(mHWnd, SW_HIDE);
+		else
+			::ShowWindow(mHWnd, SW_SHOWNORMAL);
+		return S_OK;
+	}
+
 	bool Window::IsHidden() const
 	{
 		return mIsHidden;
 	}
 
-	void Window::SetFullScreen(bool fullScreen, uint32 width, uint32 height)
+	HRESULT Window::SetFullScreen(bool fullScreen, uint32 width, uint32 height)
 	{
-
+		return S_OK;
 	}
 
-	bool Window::IsVSyncEnabled() const
+	bool Window::IsFullScreen() const
 	{
-		return mIsVSync;
+		return mIsFullScreen;
 	}
 
-	void Window::SetVSyncEnabled(bool vSync)
+	HRESULT Window::SetVSyncEnabled(bool vSync)
 	{
 		mIsVSync = vSync;
 		HDC old_hdc = wglGetCurrentDC();
@@ -274,6 +271,12 @@ namespace PIL
 				// Log Error
 			}
 		}
+		return S_OK;
+	}
+
+	bool Window::IsVSyncEnabled() const
+	{
+		return mIsVSync;
 	}
 
 	bool Window::IsClosed() const
@@ -281,14 +284,32 @@ namespace PIL
 		return mIsClosed;
 	}
 
-	void Window::SwapBuffers(bool waitForVSync)
+	HRESULT Window::SwapBuffers(bool waitForVSync)
 	{
 		::SwapBuffers(mHDC);
+		return S_OK;
 	}
 
-	bool Window::IsFullScreen() const
+	void Window::AddListener(IWindowEventListener* listener)
 	{
-		return mIsFullScreen;
+		if (listener == NULL)
+			return;
+		IWindowEventListenerList::iterator it = std::find(mListenerList.begin(), mListenerList.end(), listener);
+		if (it == mListenerList.end())
+		{
+			mListenerList.push_back(listener);
+		}
+	}
+
+	void Window::RemoveListener(IWindowEventListener* listener)
+	{
+		if (listener == NULL)
+			return;
+		IWindowEventListenerList::iterator it = std::find(mListenerList.begin(), mListenerList.end(), listener);
+		if (it != mListenerList.end())
+		{
+			mListenerList.erase(it);
+		}
 	}
 
 }

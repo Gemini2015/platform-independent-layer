@@ -60,7 +60,7 @@ namespace PIL
 
 		bool IsVisible() const;
 
-		HRESULT SetActive(bool bActive);
+		HRESULT SetActive(bool active);
 
 		bool IsActive() const;
 
