@@ -44,17 +44,17 @@ int main(int argc, char** argv)
 
 	PIL::Window *w = NULL;
 
-	HRESULT hr = wm->NewWindow("Hello", 100, 100, 320, 200, NULL, &w);
+	wm->NewWindow("Hello", 100, 100, 320, 200, NULL, &w);
 	if (w)
 	{
-		w->ShowWindow(true);
+		w->SetHidden(false);
 	}
 
 	PIL::Window *w2 = NULL;
-	hr = wm->NewWindow("Hello - 1", 200, 200, 320, 200, NULL, &w2);
+	wm->NewWindow("Hello - 1", 200, 200, 320, 200, NULL, &w2);
 	if (w2)
 	{
-		w2->ShowWindow(true);
+		w2->SetHidden(false);
 	}
 	printf("Press Anykey to exit.\n");
 	while (1)

@@ -3,30 +3,34 @@
 
 namespace PIL
 {
-uint32 Window::sWindowCounter = 0;
+	uint32 Window::sWindowCounter = 0;
 	Display* Window::sDisplay = NULL;
 	int32 Window::sDisplayRefCount = 0;
 
 	Window::Window(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param)
+		: mID(sWindowCounter++)
+		, mName(name)
+		, mTitle(name)
+		, mLeft(x)
+		, mTop(y)
+		, mWidth(width)
+		, mHeight(height)
+		, mIsActive(false)
+		, mIsFullScreen(false)
+		, mIsHidden(true)
+		, mIsVSync(false)
+		, mIsClosed(true)
+		, mIsVisible(false)
+		, mWindow(0)
+		, mAtomDeleteWindow(0)
+		, mWindowManager(NULL)
 	{
-		mID = sWindowCounter++;
-		mName = name;
-		mTitle = name;
-		mLeft = x;
-		mTop = y;
-		mWidth = width;
-		mHeight = height;
 		if(param) mParamList = *param;
-		mWindowManager = NULL;
-		mIsActive = false;
-		mIsFullScreen = false;
-		mStatus = WS_None;
-		mWindow = 0L;
 	}
 
 	Window::~Window()
 	{
-		if (mStatus != WS_Destoryed)
+		if (mIsClosed == false)
 		{
 			Destory();
 		}
@@ -61,7 +65,7 @@ uint32 Window::sWindowCounter = 0;
 		XSelectInput(sDisplay, mWindow, StructureNotifyMask | VisibilityChangeMask | FocusChangeMask | ExposureMask);
 
 		XUnmapWindow(sDisplay, mWindow);
-		mStatus = WS_Hide;
+		mIsClosed = false;
 
 		sDisplayRefCount++;
 		return S_OK;
@@ -80,34 +84,17 @@ uint32 Window::sWindowCounter = 0;
 				sDisplay = NULL;
 			}
 		}
-		mStatus = WS_Destoryed;
 		mIsActive = false;
-		mIsFullScreen = false;
+		mIsClosed = true;
 		return S_OK;
-	}
-
-	bool Window::ShowWindow(bool bShow)
-	{
-		if(sDisplay == NULL || mWindow == 0L)
-			return false;
-
-		if (bShow)
-		{
-			XMapWindow(sDisplay, mWindow);
-			mStatus = WS_Show;
-		}
-		else
-		{
-			XUnmapWindow(sDisplay, mWindow);
-			mStatus = WS_Hide;
-		}
-		return true;
 	}
 
 	void Window::HandleMessage()
 	{
-
 		if(sDisplay == NULL || mWindow == 0)
+			return ;
+
+		if(IsClosed())
 			return ;
 
 		XEvent event;
@@ -184,7 +171,6 @@ uint32 Window::sWindowCounter = 0;
 			{
 				mWindowManager->DeleteWindow(this);
 			}
-			break;
 		}
 	}
 
@@ -192,26 +178,137 @@ uint32 Window::sWindowCounter = 0;
 	{
 		if(sDisplay == NULL || mWindow == 0L)
 			return E_INVALIDARG;
+
+		if(IsClosed())
+			return E_FAIL;
+
 		mTitle = title;
 		XStoreName(sDisplay, mWindow, mTitle.c_str());
 		return S_OK;
 	}
 
-	void Window::OnActiveChange(Window* w, bool bActive)
+	HRESULT Window::SetWindowPosition(int32 left, int32 top)
 	{
-		if (w == this)
+		if(sDisplay == NULL || mWindow == 0L)
+			return E_INVALIDARG;
+
+		if(IsClosed())
+			return E_FAIL;
+
+		XMoveWindow(sDisplay, mWindow, left, top);
+		return S_OK;
+	}
+
+	HRESULT Window::SetWindowSize(uint32 width, uint32 height)
+	{
+		if(sDisplay == NULL || mWindow == 0L)
+			return E_INVALIDARG;
+
+		if(IsClosed())
+			return E_FAIL;
+
+		if(mWidth == width && mHeight == height)
+			return S_OK;
+
+		if(width != 0 && height != 0)
 		{
-			SetActive(bActive);
+			XResizeWindow(sDisplay, mWindow, width, height);
+			return S_OK;
+		}
+		else
+		{
+			return E_INVALIDARG;
 		}
 	}
 
-	void Window::SetActive(bool bActive)
+	HRESULT Window::SetVisible(bool visible)
 	{
-		if (bActive)
-		{
-			mStatus = WS_Show;
-		}
+		mIsVisible = visible;
+		return S_OK;
+	}
+
+	bool Window::IsVisible() const
+	{
+		return mIsVisible;
+	}
+
+	HRESULT Window::SetActive(bool bActive)
+	{
 		mIsActive = bActive;
+		return S_OK;
+	}
+
+	bool Window::IsActive() const
+	{
+		return mIsActive && IsVisible();
+	}
+
+	HRESULT Window::SetHidden(bool hidden)
+	{
+		if(sDisplay == NULL || mWindow == 0L)
+			return E_INVALIDARG;
+
+		if(IsClosed())
+			return E_FAIL;
+
+		if(mIsHidden == hidden)
+			return S_OK;
+
+		mIsHidden = hidden;
+		if (hidden)
+		{
+			XUnmapWindow(sDisplay, mWindow);
+		}
+		else
+		{
+			XMapWindow(sDisplay, mWindow);
+		}
+		return S_OK;
+	}
+
+	bool Window::IsHidden() const
+	{
+		return mIsHidden;
+	}
+
+	HRESULT Window::SetFullScreen(bool fullScreen, uint32 width, uint32 height)
+	{
+		if(IsClosed())
+			return S_FALSE;
+
+		if(mIsFullScreen == fullScreen && mWidth == width && mHeight == height)
+			return S_OK;
+
+		return S_OK;
+	}
+
+	bool Window::IsFullScreen() const
+	{
+		return mIsFullScreen;
+	}
+
+	HRESULT SetVSyncEnabled(bool vSync)
+	{
+		return S_OK;
+	}
+
+	bool Window::IsVSyncEnabled() const
+	{
+		return true;
+	}
+
+	bool Window::IsClosed() const
+	{
+		return mIsClosed;
+	}
+
+	HRESULT Window::SwapBuffers(bool waitForVSync)
+	{
+		return S_OK;
+	}
+
+	void Window::OnActiveChange(Window* w, bool bActive)
+	{
 	}
 
 	void Window::OnMoveOrResize(Window *w)
@@ -231,6 +328,24 @@ uint32 Window::sWindowCounter = 0;
 				mWidth = attr.width;
 				mHeight = attr.height;
 			}
+		}
+	}
+
+	void Window::AddListener(IWindowEventListener* listener)
+	{
+		IWindowEventListenerList::iterator it = std::find(mListenerList.begin(), mListenerList.end(), listener);
+		if(it == mListenerList.end())
+		{
+			mListenerList.push_back(listener);
+		}
+	}
+
+	void Window::RemoveListener(IWindowEventListener* listener)
+	{
+		IWindowEventListenerList::iterator it = std::find(mListenerList.begin(), mListenerList.end(), listener);
+		if(it != mListenerList.end())
+		{
+			mListenerList.erase(it);
 		}
 	}
 }
