@@ -9,6 +9,8 @@ namespace PIL
 	class Root
 	{
 	public:
+		static Root *Instance;
+	public:
 		Root()
 		{
 			mWindowManger = new WindowManager();
@@ -16,6 +18,8 @@ namespace PIL
 			mFileSystem = new FileSystem();
 
 			mTimer = new Timer();
+
+			Instance = this;
 		}
 		~Root()
 		{
@@ -25,21 +29,34 @@ namespace PIL
 				delete mFileSystem;
 			if (mTimer)
 				delete mTimer;
+
+			Instance = NULL;
 		}
 
-		WindowManager* GetWindowManger()
+		WindowManager* GetWindowManger() const
 		{
 			return mWindowManger;
 		}
 
-		FileSystem* GetFileSystem()
+		FileSystem* GetFileSystem() const
 		{
 			return mFileSystem;
 		}
 
-		Timer* GetTimer()
+		Timer* GetTimer() const
 		{
 			return mTimer;
+		}
+
+		static Root* SingletonPtr() const
+		{
+			return Instance;
+		}
+
+		static Root& Singleton() const
+		{
+			assert(Instance != NULL);
+			return *Instance;
 		}
 
 	private:
@@ -48,6 +65,7 @@ namespace PIL
 		Timer *mTimer;
 	};
 
+	Root * Root::Instance = NULL;
 }
 
 #endif

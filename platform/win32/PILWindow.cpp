@@ -6,19 +6,27 @@ namespace PIL
 	uint32 Window::sWindowCounter = 0;
 
 	Window::Window(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param)
+		: mID(sWindowCounter++)
+		, mName(name)
+		, mTitle(name)
+		, mLeft(x)
+		, mTop(y)
+		, mWidth(width)
+		, mHeight(height)
+		, mIsActive(false)
+		, mIsFullScreen(false)
+		, mIsHidden(true)
+		, mIsVSync(false)
+		, mIsClosed(true)
+		, mIsVisible(false)
+		, mIsContextInit(false)
+		, mHInstance(NULL)
+		, mHWnd(NULL)
+		, mHDC(NULL)
+		, mHGLRC(NULL)
+		, mWindowManager(NULL)
 	{
-		mID = sWindowCounter++;
-		mName = name;
-		mTitle = name;
-		mLeft = x;
-		mTop = y;
-		mWidth = width;
-		mHeight = height;
 		if (param) mParamList = *param;
-		mWindowManager = NULL;
-		mIsActive = false;
-		mIsFullScreen = false;
-		mIsClosed = true;
 	}
 
 	Window::~Window()
@@ -62,12 +70,49 @@ namespace PIL
 			return E_FAIL;
 		}
 
+		if (SUCCEEDED(InitContext()))
+		{
+			mIsContextInit = true;
+		}
+
 		mIsClosed = false;
+		return S_OK;
+	}
+
+	HRESULT Window::InitContext()
+	{
+		mHDC = GetDC(mHWnd);
+		if (FAILED(InitPixelFormat()))
+		{
+			//Destory();
+			return E_FAIL;
+		}
+
+		if (!(mHGLRC = wglCreateContext(mHDC)))
+		{
+			return E_FAIL;
+		}
+
+		if (!wglMakeCurrent(mHDC, mHGLRC))
+		{
+			return E_FAIL;
+		}
+
 		return S_OK;
 	}
 
 	HRESULT Window::Destory()
 	{
+		if (mHGLRC)
+		{
+			wglDeleteContext(mHGLRC);
+			mHGLRC = NULL;
+		}
+		if (mHDC)
+		{
+			ReleaseDC(mHWnd, mHDC);
+			mHDC = NULL;
+		}
 		if (mHWnd)
 		{
 			DestroyWindow(mHWnd);
@@ -121,6 +166,30 @@ namespace PIL
 			break;
 		}
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
+
+	HRESULT Window::InitPixelFormat()
+	{
+		UINT iformat = -1;
+		if (mHDC == NULL)
+			return E_INVALIDARG;
+
+		PIXELFORMATDESCRIPTOR pfd;
+		memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+		pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+		pfd.nVersion = 1;
+		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+		pfd.iPixelType = PFD_TYPE_RGBA;
+		pfd.cColorBits = 24;
+		pfd.cAlphaBits = 8;
+		pfd.cDepthBits = 16;
+
+		if (!(iformat = ChoosePixelFormat(mHDC, &pfd)))
+			return E_FAIL;
+
+		if (!SetPixelFormat(mHDC, iformat, &pfd))
+			return E_FAIL;
+		return S_OK;
 	}
 
 	void Window::HandleMessage()
@@ -260,11 +329,11 @@ namespace PIL
 		mIsVSync = vSync;
 		HDC old_hdc = wglGetCurrentDC();
 		HGLRC old_context = wglGetCurrentContext();
-		if (!wglMakeCurrent(mHDC, mGLRC))
+		if (!wglMakeCurrent(mHDC, mHGLRC))
 		{
 			// Log Error
 		}
-		if (old_context && old_context != mGLRC)
+		if (old_context && old_context != mHGLRC)
 		{
 			if (!wglMakeCurrent(old_hdc, old_context))
 			{

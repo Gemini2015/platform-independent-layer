@@ -99,6 +99,8 @@ namespace PIL
 
 		HRESULT Create();
 
+		HRESULT InitContext();
+
 		HRESULT Destory();
 
 		void HandleMessage();
@@ -122,6 +124,7 @@ namespace PIL
 		bool mIsVSync;
 		bool mIsClosed;
 		bool mIsVisible;
+		bool mIsContextInit;
 
 		IWindowEventListenerList mListenerList;
 
@@ -129,10 +132,13 @@ namespace PIL
 		HINSTANCE mHInstance;
 		HWND mHWnd;
 		HDC mHDC;
-		HGLRC mGLRC;
+		HGLRC mHGLRC;
 
 	public:
 		static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	private:
+		HRESULT InitPixelFormat();
 #else
 		static Display *sDisplay;
 		static int32 sDisplayRefCount;
