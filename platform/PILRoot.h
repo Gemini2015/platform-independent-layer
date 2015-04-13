@@ -1,7 +1,9 @@
 #ifndef _PIL_ROOT_H_
 #define _PIL_ROOT_H_
 
-#include "PILInclude.h"
+#include "PILWindowManager.h"
+#include "PILFileSystem.h"
+#include "PILTime.h"
 
 namespace PIL
 {
@@ -48,12 +50,12 @@ namespace PIL
 			return mTimer;
 		}
 
-		static Root* SingletonPtr() const
+		static Root* SingletonPtr()
 		{
 			return Instance;
 		}
 
-		static Root& Singleton() const
+		static Root& Singleton()
 		{
 			assert(Instance != NULL);
 			return *Instance;
@@ -64,8 +66,6 @@ namespace PIL
 		FileSystem *mFileSystem;
 		Timer *mTimer;
 	};
-
-	Root * Root::Instance = NULL;
 }
 
 #endif

@@ -8,6 +8,8 @@
 
 #include <windows.h>
 
+#include <assert.h>
+
 #endif
 
 /************************************************************************/
@@ -132,6 +134,7 @@ namespace PIL
 	class Timer;
 	class FileSystem;
 	class Window;
+	class IWindowEventListener;
 	class WindowManager;
 	class GLUtil;
 }

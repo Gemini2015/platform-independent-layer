@@ -33,7 +33,7 @@ namespace PIL
 	{
 		if (mIsClosed == false)
 		{
-			Destory();
+			Destroy();
 		}
 	}
 
@@ -61,7 +61,7 @@ namespace PIL
 
 		RegisterClassEx(&wndclass);
 
-		mHWnd = CreateWindowEx(NULL, wndclass.lpszClassName, mTitle.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+		mHWnd = CreateWindowEx(NULL, wndclass.lpszClassName, mTitle.c_str(), WS_OVERLAPPEDWINDOW,
 			mLeft, mTop, mWidth, mHeight, NULL, NULL, mHInstance, this);
 
 		if (mHWnd == NULL)
@@ -76,7 +76,23 @@ namespace PIL
 		}
 
 		mIsClosed = false;
+
+		NotifyWindowCreate(this);
 		return S_OK;
+	}
+
+	void Window::NotifyWindowCreate(const Window* w)
+	{
+		IWindowEventListenerList::iterator it = mListenerList.begin();
+		while (it != mListenerList.end())
+		{
+			IWindowEventListener* listener = (*it);
+			if (listener != NULL)
+			{
+				listener->OnCreate(w);
+			}
+			it++;
+		}
 	}
 
 	HRESULT Window::InitContext()
@@ -101,8 +117,9 @@ namespace PIL
 		return S_OK;
 	}
 
-	HRESULT Window::Destory()
+	HRESULT Window::Destroy()
 	{
+		NotifyWindowDestroy(this);
 		if (mHGLRC)
 		{
 			wglDeleteContext(mHGLRC);
@@ -125,6 +142,20 @@ namespace PIL
 		return S_OK;
 	}
 
+	void Window::NotifyWindowDestroy(const Window* w)
+	{
+		IWindowEventListenerList::iterator it = mListenerList.begin();
+		while (it != mListenerList.end())
+		{
+			IWindowEventListener* listener = (*it);
+			if (listener != NULL)
+			{
+				listener->OnDestroy(w);
+			}
+			it++;
+		}
+	}
+
 	LRESULT CALLBACK Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		if (uMsg == WM_CREATE)
@@ -141,10 +172,11 @@ namespace PIL
 		{
 		case WM_ACTIVATE:
 		{
+			bool active = (LOWORD(wParam)) != WA_INACTIVE;
+			w->OnActiveChange(w, active);
 			if (w->GetWindowManager())
 			{
-				bool bActive = (LOWORD(wParam)) != WA_INACTIVE;
-				w->GetWindowManager()->ChangeActiveWindow(w, bActive);
+				w->GetWindowManager()->NotifyWindowActiveChange(w);
 			}
 		}
 			break;
@@ -153,12 +185,36 @@ namespace PIL
 		}
 			break;
 		case WM_MOVE:
+		{
+			w->OnMoveOrResize(w);
+			if (w->GetWindowManager())
+			{
+				w->GetWindowManager()->NotifyWindowMove(w);
+			}
+		}
+			break;
 		case WM_SIZE:
+		{
+			w->OnMoveOrResize(w);
+			if (w->GetWindowManager())
+			{
+				w->GetWindowManager()->NotifyWindowResize(w);
+			}
+		}
+			break;
 		case WM_DISPLAYCHANGE:
+		{
+			w->OnMoveOrResize(w);
+		}
+			break;
+		case WM_CLOSE:
 		{
 			if (w->GetWindowManager())
 			{
-				w->GetWindowManager()->MoveOrResizeWindow(w);
+				bool ret = w->GetWindowManager()->NotifyWindowClosing(w);
+				if (!ret) return 0;
+
+				w->GetWindowManager()->DeleteWindow(w);
 			}
 		}
 			break;
@@ -185,7 +241,7 @@ namespace PIL
 		pfd.cDepthBits = 16;
 
 		if (!(iformat = ChoosePixelFormat(mHDC, &pfd)))
-			return E_FAIL;
+			return E_FAIL; 
 
 		if (!SetPixelFormat(mHDC, iformat, &pfd))
 			return E_FAIL;
@@ -202,11 +258,30 @@ namespace PIL
 		}
 	}
 
-	void Window::OnActiveChange(Window* w, bool bActive)
+	void Window::OnActiveChange(const Window* w, bool bActive)
 	{
+		if (w == this && mHWnd != NULL)
+		{
+			mIsActive = bActive;
+			NotifyActiveChange(bActive);
+		}
 	}
 
-	void Window::OnMoveOrResize(Window *w)
+	void Window::NotifyActiveChange(bool active)
+	{
+		IWindowEventListenerList::iterator it = mListenerList.begin();
+		while (it != mListenerList.end())
+		{
+			IWindowEventListener* listener = (*it);
+			if (listener != NULL)
+			{
+				listener->OnSetActive(this, active);
+			}
+			it++;
+		}
+	}
+
+	void Window::OnMoveOrResize(const Window *w)
 	{
 		if (w == this)
 		{
@@ -215,13 +290,53 @@ namespace PIL
 				RECT rect;
 				GetWindowRect(mHWnd, &rect);
 
-				mLeft = rect.left;
-				mTop = rect.top;
+				if (mLeft != rect.left || mTop != rect.top)
+				{
+					Point oldPos(mLeft, mTop);
+					mLeft = rect.left;
+					mTop = rect.top;
+					NotifyWindowMove(oldPos, Point(rect.left, rect.top));
+				}
 
 				GetClientRect(mHWnd, &rect);
-				mWidth = rect.right - rect.left;
-				mHeight = rect.bottom - rect.top;
+				uint32 newWidth = rect.right - rect.left;
+				uint32 newHeight = rect.bottom - rect.top;
+				if (mWidth != newWidth || mHeight != newHeight)
+				{
+					Point oldSize(mWidth, mHeight);
+					mWidth = rect.right - rect.left;
+					mHeight = rect.bottom - rect.top;
+					NotifyWindowResize(oldSize, Point(newWidth, newHeight));
+				}
 			}
+		}
+	}
+
+	void Window::NotifyWindowMove(const Point& oldPos, const Point& newPos)
+	{
+		IWindowEventListenerList::iterator it = mListenerList.begin();
+		while (it != mListenerList.end())
+		{
+			IWindowEventListener* listener = (*it);
+			if (listener != NULL)
+			{
+				listener->OnWindowMove(this, oldPos, newPos);
+			}
+			it++;
+		}
+	}
+
+	void Window::NotifyWindowResize(const Size& oldSize, const Size& newSize)
+	{
+		IWindowEventListenerList::iterator it = mListenerList.begin();
+		while (it != mListenerList.end())
+		{
+			IWindowEventListener* listener = (*it);
+			if (listener != NULL)
+			{
+				listener->OnWindowResize(this, oldSize, newSize);
+			}
+			it++;
 		}
 	}
 

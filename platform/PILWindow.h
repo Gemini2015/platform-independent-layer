@@ -14,25 +14,29 @@ namespace PIL
 {
 	class IWindowEventListener
 	{
-		virtual ~IWindowEventListener();
+	public:
+		virtual ~IWindowEventListener() {}
 
 		// after window created
-		virtual void OnCreate(IWindowEventListener* sender, Window* w) = 0;
+		virtual void OnCreate(const PIL::Window* w) {}
+
+		// before window closed
+		virtual bool OnClosing(const PIL::Window* w) { return true; }
 
 		// before window destroy
-		virtual void OnDestroy(IWindowEventListener* sender, Window* w) = 0;
+		virtual void OnDestroy(const PIL::Window* w) {}
 
 		// focus change
-		virtual void OnSetActive(IWindowEventListener* sender, Window* w, bool active) = 0;
+		virtual void OnSetActive(const PIL::Window* w, bool active) = 0;
 
 		// visibility change
-		virtual void OnSetVisible(IWindowEventListener* sender, Window* w, bool visible) = 0;
+		virtual void OnSetVisible(const PIL::Window* w, bool visible) {}
 
 		// window move
-		virtual void OnWindowMove(IWindowEventListener* sender, Window* w, Point oldPos, Point newPos) = 0;
+		virtual void OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos) = 0;
 
 		// window resize
-		virtual void OnWindowResize(IWindowEventListener* sender, Window* w, Size oldSize, Size newSize) = 0;
+		virtual void OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize) = 0;
 
 	};
 
@@ -99,15 +103,25 @@ namespace PIL
 
 		HRESULT Create();
 
+		void NotifyWindowCreate(const Window* w);
+
 		HRESULT InitContext();
 
-		HRESULT Destory();
+		HRESULT Destroy();
+
+		void NotifyWindowDestroy(const Window* w);
 
 		void HandleMessage();
 
-		void OnActiveChange(Window* w, bool bActive);
+		void OnActiveChange(const Window* w, bool bActive);
 
-		void OnMoveOrResize(Window* w);
+		void NotifyActiveChange(bool active);
+
+		void OnMoveOrResize(const Window* w);
+
+		void NotifyWindowMove(const Point& oldPos, const Point& newPos);
+
+		void NotifyWindowResize(const Size& oldSize, const Size& newSize);
 
 	protected:
 		uint32 mID;

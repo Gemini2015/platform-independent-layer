@@ -14,6 +14,7 @@ set(PLATFORM_INC
 if(WIN32)
 
 set(PLATFORM_SRC
+	"win32/PILRoot.cpp"
 	"win32/PILTime.cpp"
 	"win32/PILFileSystem.cpp"
 	"win32/PILWindowManager.cpp"
