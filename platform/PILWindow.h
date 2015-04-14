@@ -91,6 +91,10 @@ namespace PIL
 
 		void RemoveListener(IWindowEventListener* listener);
 
+		void BindCustomWindow(void* window);
+
+		void* GetCustomWindow() const;
+
 	private:
 		Window(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param);
 
@@ -163,6 +167,7 @@ namespace PIL
 	private:
 		static uint32 sWindowCounter;
 		WindowManager* mWindowManager;
+		void* mCustomWindow;
 	};
 }
 

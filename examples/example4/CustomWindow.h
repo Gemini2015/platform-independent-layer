@@ -6,9 +6,11 @@
 class CustomWindow : public PIL::IWindowEventListener
 {
 public:
-	CustomWindow(PIL::Window *w);
+	CustomWindow(std::string name, PIL::Window *w);
 
 	~CustomWindow();
+
+	std::string GetName() const;
 
 	void SetHidden(bool hidden);
 
@@ -30,7 +32,7 @@ public:
 
 private:
 	PIL::Window* mWindow;
-
+	std::string mName;
 };
 
 class WindowListener : public PIL::IWindowEventListener
