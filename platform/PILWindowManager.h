@@ -37,9 +37,9 @@ namespace PIL
 			}
 		}
 
-		HRESULT NewWindow(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param, Window** ppWindow)
+		HRESULT NewWindow(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param = NULL, void* userWindow = NULL, Window** ppWindow = NULL)
 		{
-			if (name.empty() || width < 0 || height < 0 || ppWindow == NULL)
+			if (name.empty() || width < 0 || height < 0)
 				return E_INVALIDARG;
 			Window_Map::iterator it = mWindowMap.find(name);
 			if (it != mWindowMap.end())
@@ -58,8 +58,9 @@ namespace PIL
 				delete window;
 				return E_FAIL;
 			}
+			window->BindUserWindow(userWindow);
 			mWindowBufMap[name] = std::pair<Window*, WindowState>(window, WS_New);
-			(*ppWindow) = window;
+			if(ppWindow != NULL) (*ppWindow) = window;
 			return S_OK;
 		}
 

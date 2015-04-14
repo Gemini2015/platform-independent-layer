@@ -496,12 +496,12 @@ namespace PIL
 		}
 	}
 
-	void Window::BindCustomWindow(void* window)
+	void Window::BindUserWindow(void* window)
 	{
 		mCustomWindow = window;
 	}
 
-	void* Window::GetCustomWindow() const
+	void* Window::GetUserWindow() const
 	{
 		return mCustomWindow;
 	}

@@ -6,7 +6,7 @@
 class CustomWindow : public PIL::IWindowEventListener
 {
 public:
-	CustomWindow(std::string name, PIL::Window *w);
+	CustomWindow(std::string name);
 
 	~CustomWindow();
 
@@ -18,7 +18,7 @@ public:
 
 	void SetSize(uint32 width, uint32 height);
 
-	static CustomWindow* Create(std::string name);
+	HRESULT Create();
 
 
 
@@ -29,6 +29,8 @@ public:
 	virtual void OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos) override;
 
 	virtual void OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize) override;
+
+	int a;
 
 private:
 	PIL::Window* mWindow;

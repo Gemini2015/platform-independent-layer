@@ -3,9 +3,9 @@
 
 #include <iostream>
 
-CustomWindow::CustomWindow(std::string name, PIL::Window *w)
+CustomWindow::CustomWindow(std::string name)
 	: mName(name)
-	, mWindow(w)
+	, mWindow(NULL)
 {
 }
 
@@ -43,24 +43,19 @@ void CustomWindow::SetSize(uint32 width, uint32 height)
 	}
 }
 
-CustomWindow* CustomWindow::Create(std::string name)
+HRESULT CustomWindow::Create()
 {
 	PIL::WindowManager* wm = PIL::Root::SingletonPtr()->GetWindowManger();
 	PIL::Window* w = NULL;
-	HRESULT hr = wm->NewWindow(name, 100, 100, 320, 240, NULL, &w);
+	HRESULT hr = wm->NewWindow(mName, 100, 100, 320, 240, NULL, this, &w);
 	if (FAILED(hr))
 	{
-		return NULL;
+		return E_FAIL;
 	}
+	mWindow = w;
 	w->SetHidden(true);
-	CustomWindow* window = new CustomWindow(name, w);
-	if (window == NULL)
-	{
-		wm->DeleteWindow(w);
-	}
-	w->BindCustomWindow(window);
-	w->AddListener(window);
-	return window;
+	w->AddListener(this);
+	return S_OK;
 }
 
 void CustomWindow::OnDestroy(const PIL::Window* w)
@@ -89,45 +84,45 @@ void CustomWindow::OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize
 
 void WindowListener::OnCreate(const PIL::Window* w)
 {
-	if (w && w->GetCustomWindow())
+	if (w && w->GetUserWindow())
 	{
-		const CustomWindow* window = (const CustomWindow*)w->GetCustomWindow();
+		const CustomWindow* window = (const CustomWindow*)w->GetUserWindow();
 		std::cout << "WindowListener: " << window->GetName() << " Create" << std::endl;
 	}
 }
 
 void WindowListener::OnSetActive(const PIL::Window* w, bool active)
 {
-	if (w && w->GetCustomWindow())
+	if (w && w->GetUserWindow())
 	{
-		const CustomWindow* window = (const CustomWindow*)w->GetCustomWindow();
+		const CustomWindow* window = (const CustomWindow*)w->GetUserWindow();
 		std::cout << "WindowListener: " << window->GetName() << " Active Change" << std::endl;
 	}
 }
 
 void WindowListener::OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos)
 {
-	if (w && w->GetCustomWindow())
+	if (w && w->GetUserWindow())
 	{
-		const CustomWindow* window = (const CustomWindow*)w->GetCustomWindow();
+		const CustomWindow* window = (const CustomWindow*)w->GetUserWindow();
 		std::cout << "WindowListener: " << window->GetName() << " Move" << std::endl;
 	}
 }
 
 void WindowListener::OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize)
 {
-	if (w && w->GetCustomWindow())
+	if (w && w->GetUserWindow())
 	{
-		const CustomWindow* window = (const CustomWindow*)w->GetCustomWindow();
+		const CustomWindow* window = (const CustomWindow*)w->GetUserWindow();
 		std::cout << "WindowListener: " << window->GetName() << " Resize" << std::endl;
 	}
 }
 
 bool WindowListener::OnClosing(const PIL::Window* w)
 {
-	if (w && w->GetCustomWindow())
+	if (w && w->GetUserWindow())
 	{
-		const CustomWindow* window = (const CustomWindow*)w->GetCustomWindow();
+		const CustomWindow* window = (const CustomWindow*)w->GetUserWindow();
 		std::cout << "WindowListener: Close " << window->GetName() << " ? (y/n)" << std::endl;
 		char in;
 		std::cin >> in;

@@ -91,9 +91,7 @@ namespace PIL
 
 		void RemoveListener(IWindowEventListener* listener);
 
-		void BindCustomWindow(void* window);
-
-		void* GetCustomWindow() const;
+		void* GetUserWindow() const;
 
 	private:
 		Window(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param);
@@ -126,6 +124,8 @@ namespace PIL
 		void NotifyWindowMove(const Point& oldPos, const Point& newPos);
 
 		void NotifyWindowResize(const Size& oldSize, const Size& newSize);
+
+		void BindUserWindow(void* window);
 
 	protected:
 		uint32 mID;
