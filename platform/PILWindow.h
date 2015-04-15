@@ -12,6 +12,10 @@
 
 namespace PIL
 {
+	class WindowObject
+	{
+	};
+
 	class IWindowEventListener
 	{
 	public:
@@ -91,7 +95,7 @@ namespace PIL
 
 		void RemoveListener(IWindowEventListener* listener);
 
-		void* GetUserWindow() const;
+		WindowObject* GetUserWindow() const;
 
 	private:
 		Window(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param);
@@ -125,7 +129,7 @@ namespace PIL
 
 		void NotifyWindowResize(const Size& oldSize, const Size& newSize);
 
-		void BindUserWindow(void* window);
+		void BindUserWindow(WindowObject* window);
 
 	protected:
 		uint32 mID;
@@ -167,7 +171,7 @@ namespace PIL
 	private:
 		static uint32 sWindowCounter;
 		WindowManager* mWindowManager;
-		void* mCustomWindow;
+		WindowObject* mCustomWindow;
 	};
 }
 

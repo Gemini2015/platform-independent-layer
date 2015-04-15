@@ -3,7 +3,9 @@
 #include "PILPrerequisites.h"
 #include "PILWindow.h"
 
-class CustomWindow : public PIL::IWindowEventListener
+class CustomWindow : 
+	public PIL::WindowObject,
+	public PIL::IWindowEventListener
 {
 public:
 	CustomWindow(std::string name);

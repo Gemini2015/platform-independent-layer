@@ -44,14 +44,14 @@ int main(int argc, char** argv)
 
 	PIL::Window *w = NULL;
 
-	wm->NewWindow("Hello", 100, 100, 320, 200, NULL, &w);
+	wm->NewWindow("Hello", 100, 100, 320, 200, NULL, NULL, &w);
 	if (w)
 	{
 		w->SetHidden(false);
 	}
 
 	PIL::Window *w2 = NULL;
-	wm->NewWindow("Hello - 1", 200, 200, 320, 200, NULL, &w2);
+	wm->NewWindow("Hello - 1", 200, 200, 320, 200, NULL, NULL, &w2);
 	if (w2)
 	{
 		w2->SetHidden(false);

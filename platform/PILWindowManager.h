@@ -37,7 +37,7 @@ namespace PIL
 			}
 		}
 
-		HRESULT NewWindow(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param = NULL, void* userWindow = NULL, Window** ppWindow = NULL)
+		HRESULT NewWindow(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param = NULL, WindowObject* userWindow = NULL, Window** ppWindow = NULL)
 		{
 			if (name.empty() || width < 0 || height < 0)
 				return E_INVALIDARG;
