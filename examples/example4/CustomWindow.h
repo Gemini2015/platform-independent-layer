@@ -32,8 +32,6 @@ public:
 
 	virtual void OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize) override;
 
-	int a;
-
 private:
 	PIL::Window* mWindow;
 	std::string mName;
