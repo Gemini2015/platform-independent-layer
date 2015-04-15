@@ -135,6 +135,7 @@ namespace PIL
 	class FileSystem;
 	class Window;
 	class IWindowEventListener;
+	class WindowObject;
 	class WindowManager;
 	class GLUtil;
 }
