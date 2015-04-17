@@ -25,6 +25,7 @@ namespace PIL
 		, mHDC(NULL)
 		, mHGLRC(NULL)
 		, mWindowManager(NULL)
+		, mUserWindow(NULL)
 	{
 		if (param) mParamList = *param;
 	}
@@ -139,6 +140,7 @@ namespace PIL
 		mIsActive = false;
 		mIsFullScreen = false;
 		mIsClosed = true;
+		mUserWindow = NULL;
 		return S_OK;
 	}
 
@@ -230,15 +232,18 @@ namespace PIL
 		if (mHDC == NULL)
 			return E_INVALIDARG;
 
+		UpdatePixelFormatParams();
+
 		PIXELFORMATDESCRIPTOR pfd;
 		memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
 		pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
 		pfd.nVersion = 1;
 		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		pfd.iPixelType = PFD_TYPE_RGBA;
-		pfd.cColorBits = 24;
-		pfd.cAlphaBits = 8;
-		pfd.cDepthBits = 16;
+		pfd.cColorBits = mPixelFormatParams.ColorBits;
+		pfd.cAlphaBits = mPixelFormatParams.AlphaBits;
+		pfd.cDepthBits = mPixelFormatParams.DepthBits;
+		pfd.cStencilBits = mPixelFormatParams.StencilBits;
 
 		if (!(iformat = ChoosePixelFormat(mHDC, &pfd)))
 			return E_FAIL; 
@@ -498,11 +503,42 @@ namespace PIL
 
 	void Window::BindUserWindow(WindowObject* window)
 	{
-		mCustomWindow = window;
+		mUserWindow = window;
 	}
 
 	WindowObject* Window::GetUserWindow() const
 	{
-		return mCustomWindow;
+		return mUserWindow;
 	}
+
+	void Window::UpdatePixelFormatParams()
+	{
+		if (mParamList.empty())
+			return;
+
+		NameValue_Map::iterator it = mParamList.find("ColorBits");
+		if (it != mParamList.end())
+		{
+			mPixelFormatParams.ColorBits = atoi(it->second.c_str());
+		}
+
+		it = mParamList.find("AlphaBits");
+		if (it != mParamList.end())
+		{
+			mPixelFormatParams.AlphaBits = atoi(it->second.c_str());
+		}
+
+		it = mParamList.find("DepthBits");
+		if (it != mParamList.end())
+		{
+			mPixelFormatParams.DepthBits = atoi(it->second.c_str());
+		}
+
+		it = mParamList.find("StencilBits");
+		if (it != mParamList.end())
+		{
+			mPixelFormatParams.StencilBits = atoi(it->second.c_str());
+		}
+	}
+
 }
