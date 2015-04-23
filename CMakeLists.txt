@@ -40,7 +40,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 
 set(CMAKE_BUILD_TYPE Debug)
 
-link_directories(${PROJECT_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
+link_directories(${PROJECT_BINARY_DIR}/lib)
 
 include_directories(${PLATFORM_INDEP_LAYER_INC})
 include_directories(${PROJECT_BINARY_DIR})
