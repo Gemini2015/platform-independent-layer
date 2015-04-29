@@ -1,6 +1,7 @@
 project(platform)
 
 set(PLATFORM_INC
+	"${CMAKE_BINARY_DIR}/include/PILConfig.h"
     "PILPrerequisites.h"
 	"PILInclude.h"
 	"PILRoot.h"
@@ -39,31 +40,36 @@ set(PLATFORM_SRC
 
 endif()
 
-add_library(${PROJECT_NAME} STATIC ${PLATFORM_INC} ${PLATFORM_SRC})
+add_library(${PROJECT_NAME} ${PIL_LIB_TYPE} ${PLATFORM_INC} ${PLATFORM_SRC})
 target_link_libraries(${PROJECT_NAME} ${SYS_LIB_LIST})
+
+if(NOT PIL_STATIC)
+	set_target_properties(${PROJECT_NAME} PROPERTIES
+		COMPILE_DEFINITIONS PIL_EXPORTS)
+endif()
 
 foreach(lib_file platform)
 
 	install(TARGETS ${lib_file}
-		RUNTIME DESTINATION "lib/Debug" CONFIGURATIONS Debug
+		RUNTIME DESTINATION "bin/Debug" CONFIGURATIONS Debug
 		LIBRARY DESTINATION "lib/Debug"  CONFIGURATIONS Debug
 		ARCHIVE DESTINATION "lib/Debug" CONFIGURATIONS Debug
 		)
 
 	install(TARGETS ${lib_file}
-		RUNTIME DESTINATION "lib/Release" CONFIGURATIONS Release
+		RUNTIME DESTINATION "bin/Release" CONFIGURATIONS Release
 		LIBRARY DESTINATION "lib/Release"  CONFIGURATIONS Release
 		ARCHIVE DESTINATION "lib/Release" CONFIGURATIONS Release
 		)
 
 	install(TARGETS ${lib_file}
-		RUNTIME DESTINATION "lib/RelWithDebInfo" CONFIGURATIONS RelWithDebInfo
+		RUNTIME DESTINATION "bin/RelWithDebInfo" CONFIGURATIONS RelWithDebInfo
 		LIBRARY DESTINATION "lib/RelWithDebInfo"  CONFIGURATIONS RelWithDebInfo
 		ARCHIVE DESTINATION "lib/RelWithDebInfo" CONFIGURATIONS RelWithDebInfo
 		)
 
 	install(TARGETS ${lib_file}
-		RUNTIME DESTINATION "lib/MinSizeRel" CONFIGURATIONS MinSizeRel
+		RUNTIME DESTINATION "bin/MinSizeRel" CONFIGURATIONS MinSizeRel
 		LIBRARY DESTINATION "lib/MinSizeRel"  CONFIGURATIONS MinSizeRel
 		ARCHIVE DESTINATION "lib/MinSizeRel" CONFIGURATIONS MinSizeRel
 		)
@@ -71,7 +77,7 @@ foreach(lib_file platform)
 endforeach()
 
 install(FILES
-	${CMAKE_BINARY_DIR}/config.h
+	${CMAKE_BINARY_DIR}/include/PILConfig.h
 	PILPrerequisites.h
 	PILInclude.h
 	PILRoot.h

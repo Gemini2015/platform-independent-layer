@@ -1,0 +1,8 @@
+#pragma once
+
+#cmakedefine PLATFORM_WIN32
+
+#cmakedefine PLATFORM_LINUX
+
+#cmakedefine PIL_STATIC_LIB
+

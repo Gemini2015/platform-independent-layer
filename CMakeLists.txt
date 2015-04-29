@@ -24,13 +24,22 @@ SET(SYS_LIB_LIST ${SYS_LIB_LIST} "X11")
 
 endif()
 
-configure_file(
-	"${PROJECT_SOURCE_DIR}/platform/config.h.in"
-	"${PROJECT_BINARY_DIR}/config.h"
-	)
-
 # option
 option(BUILD_EXAMPLES "build examples" ON)
+option(PIL_STATIC "build static lib" FALSE)
+
+set(PIL_STATIC_LIB 0)
+if(PIL_STATIC)
+	set(PIL_LIB_TYPE STATIC)
+	set(PIL_STATIC_LIB 1)
+else()
+	set(PIL_LIB_TYPE SHARED)
+endif()
+
+configure_file(
+	"${PROJECT_SOURCE_DIR}/platform/PILConfig.h.in"
+	"${PROJECT_BINARY_DIR}/include/PILConfig.h"
+	)
 
 set(PLATFORM_INDEP_LAYER_INC ${PROJECT_SOURCE_DIR}/platform)
 
@@ -38,12 +47,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 
-set(CMAKE_BUILD_TYPE Debug)
-
 link_directories(${PROJECT_BINARY_DIR}/lib)
 
 include_directories(${PLATFORM_INDEP_LAYER_INC})
-include_directories(${PROJECT_BINARY_DIR})
+include_directories(${PROJECT_BINARY_DIR}/include)
 
 add_subdirectory(platform)
 add_subdirectory(examples)
