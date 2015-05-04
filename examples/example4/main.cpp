@@ -41,9 +41,9 @@ int _kbhit(void)
 int main()
 {
 	PIL::Root* root = new PIL::Root();
-	WindowListener* listener = new WindowListener();
+	//WindowListener* listener = new WindowListener();
 	PIL::WindowManager* wm = root->GetWindowManger();
-	wm->AddListener(listener);
+	//wm->AddListener(listener);
 	CustomWindow* window = new CustomWindow("Window - 1");
 	if (window == NULL)
 		return -1;
@@ -54,11 +54,8 @@ int main()
 		window = NULL;
 	}
 
-
-	char in;
 	std::cout << "Window Created\n";
-	std::cout << "Show Window ?\n";
-	std::cin >> in;
+	std::cout << "Show Window\n";
 	window->SetHidden(false);
 
 	CustomWindow* window2 = new CustomWindow("Window - 2");
@@ -71,8 +68,7 @@ int main()
 		window2 = NULL;
 	}
 
-	std::cout << "Show Window ?\n";
-	std::cin >> in;
+	std::cout << "Show Window \n";
 	window2->SetHidden(false);
 
 	while (1)
@@ -90,6 +86,8 @@ int main()
 		delete window;
 	if (window2)
 		delete window2;
+	/*if (listener)
+		delete listener;*/
 	return 0;
 }
 

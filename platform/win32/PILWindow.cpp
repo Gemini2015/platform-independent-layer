@@ -49,7 +49,7 @@ namespace PIL
 		WNDCLASSEX wndclass;
 		wndclass.cbSize = sizeof(wndclass);
 		wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_DBLCLKS;
-		wndclass.lpfnWndProc = WindowProc;
+		wndclass.lpfnWndProc = WindowManager::WindowProc;
 		wndclass.cbClsExtra = 0;
 		wndclass.cbWndExtra = 0;
 		wndclass.hInstance = mHInstance;
@@ -120,7 +120,7 @@ namespace PIL
 
 	HRESULT Window::Destroy()
 	{
-		NotifyWindowDestroy(this);
+		//NotifyWindowDestroy(this);
 		if (mHGLRC)
 		{
 			wglDeleteContext(mHGLRC);
@@ -156,74 +156,7 @@ namespace PIL
 			}
 			it++;
 		}
-	}
-
-	LRESULT CALLBACK Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		if (uMsg == WM_CREATE)
-		{
-			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)(((LPCREATESTRUCT)lParam)->lpCreateParams));
-			return 0;
-		}
-
-		Window* w = (Window*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-		if (!w)
-			return DefWindowProc(hWnd, uMsg, wParam, lParam);
-
-		switch (uMsg)
-		{
-		case WM_ACTIVATE:
-		{
-			bool active = (LOWORD(wParam)) != WA_INACTIVE;
-			w->OnActiveChange(w, active);
-			if (w->GetWindowManager())
-			{
-				w->GetWindowManager()->NotifyWindowActiveChange(w);
-			}
-		}
-			break;
-		case WM_KEYDOWN:
-		{
-		}
-			break;
-		case WM_MOVE:
-		{
-			w->OnMoveOrResize(w);
-			if (w->GetWindowManager())
-			{
-				w->GetWindowManager()->NotifyWindowMove(w);
-			}
-		}
-			break;
-		case WM_SIZE:
-		{
-			w->OnMoveOrResize(w);
-			if (w->GetWindowManager())
-			{
-				w->GetWindowManager()->NotifyWindowResize(w);
-			}
-		}
-			break;
-		case WM_DISPLAYCHANGE:
-		{
-			w->OnMoveOrResize(w);
-		}
-			break;
-		case WM_CLOSE:
-		{
-			if (w->GetWindowManager())
-			{
-				bool ret = w->GetWindowManager()->NotifyWindowClosing(w);
-				if (!ret) return 0;
-
-				w->GetWindowManager()->DeleteWindow(w);
-			}
-		}
-			break;
-		default:
-			break;
-		}
-		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		mListenerList.clear();
 	}
 
 	HRESULT Window::InitPixelFormat()

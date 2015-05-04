@@ -4,7 +4,7 @@
 #include "PILPrerequisites.h"
 
 #include "PILWindow.h"
-
+#include <iostream>
 namespace PIL
 {
 	class PILExport WindowManager
@@ -23,17 +23,6 @@ namespace PIL
 			{
 				delete it->second;
 				it = mWindowMap.erase(it);
-			}
-
-			WindowBuf_Map::iterator bufIt = mWindowBufMap.begin();
-			while (bufIt != mWindowBufMap.end())
-			{
-				if (bufIt->second.second == WS_New)
-				{
-					delete bufIt->second.first;
-					bufIt = mWindowBufMap.erase(bufIt);
-				}
-				bufIt++;
 			}
 		}
 
@@ -59,7 +48,7 @@ namespace PIL
 				return E_FAIL;
 			}
 			window->BindUserWindow(userWindow);
-			mWindowBufMap[name] = std::pair<Window*, WindowState>(window, WS_New);
+			mWindowMap[name] = window;
 			if(ppWindow != NULL) (*ppWindow) = window;
 			return S_OK;
 		}
@@ -76,40 +65,21 @@ namespace PIL
 				return S_OK;
 			}
 
-			WindowBuf_Map::iterator bufIt = mWindowBufMap.find(name);
-			if (bufIt != mWindowBufMap.end())
-			{
-				(*ppWindow) = bufIt->second.first;
-				return S_OK;
-			}
-
 			return E_FAIL;
 		}
 
 		HRESULT DeleteWindow(Window* window)
 		{
+			if (window == nullptr)
+				return E_INVALIDARG;
 			bool bFound = false;
-			Window_Map::iterator it = mWindowMap.begin();
-			while (it != mWindowMap.end())
+			Window_Map::iterator it = mWindowMap.find(window->mName);
+			if (it != mWindowMap.end())
 			{
-				if (it->second == window)
-				{
-					bFound = true;
-					break;
-				}
-				it++;
+				delete it->second;
+				mWindowMap.erase(it);
 			}
-			if (bFound)
-			{
-				if (it->second)
-				{
-					delete it->second;
-					it->second = NULL;
-				}
-				mWindowBufMap[it->first] = std::pair<Window*, WindowState>(NULL, WS_Delete);
-				return S_OK;
-			}
-			else return S_FALSE;
+			return S_OK;
 		}
 
 		HRESULT DeleteWindow(std::string name)
@@ -120,9 +90,8 @@ namespace PIL
 				if (it->second)
 				{
 					delete it->second;
-					it->second = NULL;
+					mWindowMap.erase(it);
 				}
-				mWindowBufMap[it->first] = std::pair<Window*, WindowState>(NULL, WS_Delete);
 				return S_OK;
 			}
 			else return S_FALSE;
@@ -158,52 +127,18 @@ namespace PIL
 			return S_OK;
 		}
 
-		void SyncWindow()
-		{
-			WindowBuf_Map::iterator it = mWindowBufMap.begin();
-			while (it != mWindowBufMap.end())
-			{
-				if (it->second.second == WS_New)
-				{
-					Window_Map::iterator w = mWindowMap.find(it->first);
-					if (w == mWindowMap.end())
-					{
-						mWindowMap[it->first] = it->second.first;
-					}
-				}
-				else if (it->second.second == WS_Delete)
-				{
-					Window_Map::iterator w = mWindowMap.find(it->first);
-					if (w != mWindowMap.end())
-					{
-						mWindowMap.erase(w);
-					}
-				}
-				else
-				{
-					// Log error
-				}
-				it++;
-			}
-			mWindowBufMap.clear();
-		}
-
 		HRESULT HandleMessage()
 		{
-			SyncWindow();
-			Window_Map::iterator it = mWindowMap.begin();
-			while (it != mWindowMap.end())
+			MSG  msg;
+			while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
 			{
-				if (it->second)
-				{
-					it->second->HandleMessage();
-				}
-				it++;
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
 			}
-			return S_OK;
+			return true;
 		}
 
-		void NotifyWindowActiveChange(const Window* w)
+		void NotifyWindowActiveChange(const Window* w, bool active)
 		{
 			IWindowEventListenerList::iterator it = mListenerList.begin();
 			while (it != mListenerList.end())
@@ -211,7 +146,7 @@ namespace PIL
 				IWindowEventListener* listener = (*it);
 				if (listener != NULL)
 				{
-					listener->OnSetActive(w, false);
+					listener->OnSetActive(w, active);
 				}
 				it++;
 			}
@@ -284,13 +219,14 @@ namespace PIL
 			}
 		}
 
-	private:
+	public:
+		static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	public:
 		typedef std::map<std::string, Window*> Window_Map;
-		Window_Map mWindowMap;
+		static Window_Map mWindowMap;
 
-		typedef std::map<std::string, std::pair<Window*, WindowState>> WindowBuf_Map;
-		WindowBuf_Map mWindowBufMap;
-
+	private:
 		IWindowEventListenerList mListenerList;
 	};
 }

@@ -178,9 +178,6 @@ namespace PIL
 		HDC mHDC;
 		HGLRC mHGLRC;
 
-	public:
-		static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 	private:
 		HRESULT InitPixelFormat();
 #else

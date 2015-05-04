@@ -55,6 +55,7 @@ HRESULT CustomWindow::Create()
 	mWindow = w;
 	w->SetHidden(true);
 	w->AddListener(this);
+	wm->AddListener(this);
 	return S_OK;
 }
 
@@ -63,12 +64,16 @@ void CustomWindow::OnDestroy(const PIL::Window* w)
 	if (w)
 	{
 		std::cout << w->GetWindowTitle() << " Destroy" << std::endl;
+		w->GetWindowManager()->RemoveListener(this);
 	}
 }
 
 void CustomWindow::OnSetActive(const PIL::Window* w, bool active)
 {
-	std::cout << w->GetWindowTitle() << " " << (active ? "Active" : "Inactive") << std::endl;
+	if (w == mWindow)
+		std::cout << w->GetWindowTitle() << " " << (active ? "Active" : "Inactive") << std::endl;
+	else
+		std::cout << "Other Window active change." << std::endl;
 }
 
 void CustomWindow::OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos)
