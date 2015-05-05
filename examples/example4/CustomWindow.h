@@ -22,7 +22,7 @@ public:
 
 	HRESULT Create();
 
-
+	void ReleaseWindow();
 
 	virtual void OnDestroy(const PIL::Window* w) override;
 

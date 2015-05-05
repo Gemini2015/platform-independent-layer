@@ -137,7 +137,8 @@ namespace PIL
 
 	HRESULT WindowManager::ShutDownWindow(Window* w)
 	{
-		return S_OK;
+		int res = PostMessage(w->mHWnd, WM_CLOSE, 0, 0);
+		return res != 0 ? S_OK : E_FAIL;
 	}
 
 	HRESULT WindowManager::DeleteWindow(Window* window)

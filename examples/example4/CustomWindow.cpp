@@ -86,6 +86,15 @@ void CustomWindow::OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize
 	std::cout << w->GetWindowTitle() << " Resize From (" << oldSize.x << "," << oldSize.y << ") to (" << newSize.x << "," << newSize.y << ") " << std::endl;
 }
 
+void CustomWindow::ReleaseWindow()
+{
+	HRESULT hr = mWindow->GetWindowManager()->ShutDownWindow(mWindow);
+	if (!FAILED(hr))
+	{
+		std::cout << "Release Window " << GetName() << std::endl;
+	}
+}
+
 
 void WindowListener::OnCreate(const PIL::Window* w)
 {

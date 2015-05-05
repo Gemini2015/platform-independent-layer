@@ -80,6 +80,20 @@ int main()
 		}
 	}
 
+	window->ReleaseWindow();
+	//window2->ReleaseWindow();
+
+	getchar();
+
+	while (1)
+	{
+		wm->HandleMessage();
+		if (_kbhit())
+		{
+			break;
+		}
+	}
+
 	if (root)
 		delete root;
 	if (window)
@@ -88,6 +102,9 @@ int main()
 		delete window2;
 	/*if (listener)
 		delete listener;*/
+
+	getchar();
+	getchar();
 	return 0;
 }
 
