@@ -1,4 +1,5 @@
 #include "PILWindowManager.h"
+#include "PILRoot.h"
 
 namespace PIL
 {
@@ -10,6 +11,9 @@ namespace PIL
 		if (uMsg == WM_CREATE)
 		{
 			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)(((LPCREATESTRUCT)lParam)->lpCreateParams));
+			Window* w = (Window*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+			if(w && w->GetWindowManager())
+				w->GetWindowManager()->NotifyWindowCreate(w);
 			return 0;
 		}
 
@@ -24,7 +28,7 @@ namespace PIL
 		case WM_ACTIVATE:
 		{
 			bool active = (LOWORD(wParam)) != WA_INACTIVE;
-			w->OnActiveChange(w, active);
+			w->SetActive(active);
 			if (wm)
 			{
 				wm->NotifyWindowActiveChange(w, active);
@@ -37,7 +41,7 @@ namespace PIL
 			break;
 		case WM_MOVE:
 		{
-			w->OnMoveOrResize(w);
+			w->OnUpdateDimension();
 			if (wm)
 			{
 				wm->NotifyWindowMove(w);
@@ -46,7 +50,7 @@ namespace PIL
 			break;
 		case WM_SIZE:
 		{
-			w->OnMoveOrResize(w);
+			w->OnUpdateDimension();
 			if (wm)
 			{
 				wm->NotifyWindowResize(w);
@@ -55,7 +59,7 @@ namespace PIL
 			break;
 		case WM_DISPLAYCHANGE:
 		{
-			w->OnMoveOrResize(w);
+			w->OnUpdateDimension();
 		}
 			break;
 		case WM_CLOSE:
@@ -65,7 +69,8 @@ namespace PIL
 				bool ret = wm->NotifyWindowClosing(w);
 				if (!ret) return 0;
 
-				w->NotifyWindowDestroy(w);
+				wm->NotifyWindowDestroy(w);
+				//w->NotifyWindowDestroy(w);
 				wm->DeleteWindow(w);
 				return 0;
 			}
@@ -89,17 +94,17 @@ namespace PIL
 			return S_FALSE;
 		}
 
-		Window* window = new Window(name, x, y, width, height, param);
-		window->SetWindowManager(this);
+		Window* window = new Window(name, x, y, width, height, param, this);
 		if (window == NULL)
 			return E_OUTOFMEMORY;
 
+		window->BindUserWindow(userWindow);
 		if (FAILED(window->Create()))
 		{
 			delete window;
 			return E_FAIL;
 		}
-		window->BindUserWindow(userWindow);
+
 		mWindowMap[name] = window;
 		if (ppWindow != NULL) (*ppWindow) = window;
 		return S_OK;
@@ -137,7 +142,10 @@ namespace PIL
 
 	HRESULT WindowManager::ShutDownWindow(Window* w)
 	{
-		int res = PostMessage(w->mHWnd, WM_CLOSE, 0, 0);
+		if (w == nullptr)
+			return S_OK;
+		int res = SendMessage(w->mHWnd, WM_CLOSE, 0, 0);
+		//int res = PostMessage(w->mHWnd, WM_CLOSE, 0, 0);
 		return res != 0 ? S_OK : E_FAIL;
 	}
 
@@ -170,6 +178,34 @@ namespace PIL
 		else return S_FALSE;
 	}
 
+	void WindowManager::NotifyWindowCreate(const Window* w)
+	{
+		IWindowEventListenerList::iterator it = mListenerList.begin();
+		while (it != mListenerList.end())
+		{
+			IWindowEventListener* listener = (*it);
+			if (listener != NULL)
+			{
+				listener->OnCreate(w);
+			}
+			it++;
+		}
+	}
+
+	void WindowManager::NotifyWindowDestroy(const Window* w)
+	{
+		IWindowEventListenerList::iterator it = mListenerList.begin();
+		while (it != mListenerList.end())
+		{
+			IWindowEventListener* listener = (*it);
+			if (listener != NULL)
+			{
+				listener->OnDestroy(w);
+			}
+			it++;
+		}
+	}
+
 	void WindowManager::NotifyWindowActiveChange(const Window* w, bool active)
 	{
 		IWindowEventListenerList::iterator it = mListenerList.begin();
@@ -192,7 +228,7 @@ namespace PIL
 			IWindowEventListener* listener = (*it);
 			if (listener != NULL)
 			{
-				listener->OnWindowMove(w, Point(0, 0), Point(0, 0));
+				listener->OnWindowMove(w);
 			}
 			it++;
 		}
@@ -206,7 +242,7 @@ namespace PIL
 			IWindowEventListener* listener = (*it);
 			if (listener != NULL)
 			{
-				listener->OnWindowResize(w, Point(0, 0), Point(0, 0));
+				listener->OnWindowResize(w);
 			}
 			it++;
 		}
@@ -250,5 +286,6 @@ namespace PIL
 			mListenerList.erase(it);
 		}
 	}
+
 
 }

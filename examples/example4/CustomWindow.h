@@ -24,13 +24,15 @@ public:
 
 	void ReleaseWindow();
 
+	void ResetWindowPtr();
+
 	virtual void OnDestroy(const PIL::Window* w) override;
 
 	virtual void OnSetActive(const PIL::Window* w, bool active) override;
 
-	virtual void OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos) override;
+	virtual void OnWindowMove(const PIL::Window* w) override;
 
-	virtual void OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize) override;
+	virtual void OnWindowResize(const PIL::Window* w) override;
 
 private:
 	PIL::Window* mWindow;
@@ -39,16 +41,21 @@ private:
 
 class WindowListener : public PIL::IWindowEventListener
 {
+public:
+	WindowListener() {}
+	~WindowListener();
 
-
+private:
 	virtual void OnCreate(const PIL::Window* w) override;
 
 	virtual void OnSetActive(const PIL::Window* w, bool active) override;
 
-	virtual void OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos) override;
+	virtual void OnWindowMove(const PIL::Window* w) override;
 
-	virtual void OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize) override;
+	virtual void OnWindowResize(const PIL::Window* w) override;
 
 	virtual bool OnClosing(const PIL::Window* w) override;
+
+	virtual void OnDestroy(const PIL::Window* w) override;
 
 };

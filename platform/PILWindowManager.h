@@ -7,6 +7,7 @@
 #include <iostream>
 namespace PIL
 {
+
 	class PILExport WindowManager
 	{
 	public:
@@ -39,6 +40,10 @@ namespace PIL
 		HRESULT DeleteWindow(Window* window);
 
 		HRESULT DeleteWindow(std::string name);
+
+		void NotifyWindowCreate(const Window* w);
+
+		void NotifyWindowDestroy(const Window* w);
 
 		void NotifyWindowActiveChange(const Window* w, bool active);
 

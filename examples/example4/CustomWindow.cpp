@@ -7,11 +7,13 @@ CustomWindow::CustomWindow(std::string name)
 	: mName(name)
 	, mWindow(NULL)
 {
+	PIL::Root::SingletonPtr()->GetWindowManger()->AddListener(this);
 }
 
 CustomWindow::~CustomWindow()
 {
-	mWindow = NULL;
+	ReleaseWindow();
+	PIL::Root::Singleton().GetWindowManger()->RemoveListener(this);
 }
 
 std::string CustomWindow::GetName() const
@@ -45,6 +47,8 @@ void CustomWindow::SetSize(uint32 width, uint32 height)
 
 HRESULT CustomWindow::Create()
 {
+	if (mWindow != nullptr)
+		return  E_FAIL;
 	PIL::WindowManager* wm = PIL::Root::SingletonPtr()->GetWindowManger();
 	PIL::Window* w = NULL;
 	HRESULT hr = wm->NewWindow(mName, 100, 100, 320, 240, NULL, this, &w);
@@ -54,17 +58,15 @@ HRESULT CustomWindow::Create()
 	}
 	mWindow = w;
 	w->SetHidden(true);
-	w->AddListener(this);
-	wm->AddListener(this);
 	return S_OK;
 }
 
 void CustomWindow::OnDestroy(const PIL::Window* w)
 {
-	if (w)
+	if (w == mWindow)
 	{
 		std::cout << w->GetWindowTitle() << " Destroy" << std::endl;
-		w->GetWindowManager()->RemoveListener(this);
+		mWindow = nullptr;
 	}
 }
 
@@ -72,22 +74,24 @@ void CustomWindow::OnSetActive(const PIL::Window* w, bool active)
 {
 	if (w == mWindow)
 		std::cout << w->GetWindowTitle() << " " << (active ? "Active" : "Inactive") << std::endl;
-	else
-		std::cout << "Other Window active change." << std::endl;
 }
 
-void CustomWindow::OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos)
+void CustomWindow::OnWindowMove(const PIL::Window* w)
 {
-	std::cout << w->GetWindowTitle() << " Move From (" << oldPos.x << "," << oldPos.y << ") to (" << newPos.x << "," << newPos.y << ") " << std::endl;
+	if (mWindow == w)
+		std::cout << w->GetWindowTitle() << " Move to (" << w->GetWindowPosition().x << "," << w->GetWindowPosition().y << " )" << std::endl;
 }
 
-void CustomWindow::OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize)
+void CustomWindow::OnWindowResize(const PIL::Window* w)
 {
-	std::cout << w->GetWindowTitle() << " Resize From (" << oldSize.x << "," << oldSize.y << ") to (" << newSize.x << "," << newSize.y << ") " << std::endl;
+	if (mWindow == w)
+		std::cout << w->GetWindowTitle() << " Resize to (" << w->GetWindowSize().width << "," << w->GetWindowSize().height << ") " << std::endl;
 }
 
 void CustomWindow::ReleaseWindow()
 {
+	if (mWindow == nullptr)
+		return;
 	HRESULT hr = mWindow->GetWindowManager()->ShutDownWindow(mWindow);
 	if (!FAILED(hr))
 	{
@@ -95,6 +99,16 @@ void CustomWindow::ReleaseWindow()
 	}
 }
 
+void CustomWindow::ResetWindowPtr()
+{
+	mWindow = nullptr;
+}
+
+
+WindowListener::~WindowListener()
+{
+	PIL::Root::Singleton().GetWindowManger()->RemoveListener(this);
+}
 
 void WindowListener::OnCreate(const PIL::Window* w)
 {
@@ -114,7 +128,7 @@ void WindowListener::OnSetActive(const PIL::Window* w, bool active)
 	}
 }
 
-void WindowListener::OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos)
+void WindowListener::OnWindowMove(const PIL::Window* w)
 {
 	if (w && w->GetUserWindow())
 	{
@@ -123,7 +137,7 @@ void WindowListener::OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos
 	}
 }
 
-void WindowListener::OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize)
+void WindowListener::OnWindowResize(const PIL::Window* w)
 {
 	if (w && w->GetUserWindow())
 	{
@@ -137,14 +151,17 @@ bool WindowListener::OnClosing(const PIL::Window* w)
 	if (w && w->GetUserWindow())
 	{
 		const CustomWindow* window = (const CustomWindow*)w->GetUserWindow();
-		std::cout << "WindowListener: Close " << window->GetName() << " ? (y/n)" << std::endl;
-		char in;
-		std::cin >> in;
-		if (in == 'y')
-		{
-			return true;
-		}
-		else return false;
+		std::cout << "WindowListener: " << window->GetName() << " Closing" << std::endl;
 	}
-	else return true;
+	return true;
+}
+
+void WindowListener::OnDestroy(const PIL::Window* w)
+{
+	if (w && w->GetUserWindow())
+	{
+		CustomWindow* window = (CustomWindow*)w->GetUserWindow();
+		window->ResetWindowPtr();
+		std::cout << "WindowListener: " << window->GetName() << " Destroy" << std::endl;
+	}
 }

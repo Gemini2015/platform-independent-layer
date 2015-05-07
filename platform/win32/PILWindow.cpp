@@ -5,7 +5,7 @@ namespace PIL
 {
 	uint32 Window::sWindowCounter = 0;
 
-	Window::Window(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param)
+	Window::Window(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param, WindowManager* wm)
 		: mID(sWindowCounter++)
 		, mName(name)
 		, mTitle(name)
@@ -24,8 +24,8 @@ namespace PIL
 		, mHWnd(NULL)
 		, mHDC(NULL)
 		, mHGLRC(NULL)
-		, mWindowManager(NULL)
-		, mUserWindow(NULL)
+		, mWindowManager(wm)
+		, mUserWindow(nullptr)
 	{
 		if (param) mParamList = *param;
 	}
@@ -78,22 +78,7 @@ namespace PIL
 
 		mIsClosed = false;
 
-		NotifyWindowCreate(this);
 		return S_OK;
-	}
-
-	void Window::NotifyWindowCreate(const Window* w)
-	{
-		IWindowEventListenerList::iterator it = mListenerList.begin();
-		while (it != mListenerList.end())
-		{
-			IWindowEventListener* listener = (*it);
-			if (listener != NULL)
-			{
-				listener->OnCreate(w);
-			}
-			it++;
-		}
 	}
 
 	HRESULT Window::InitContext()
@@ -120,7 +105,6 @@ namespace PIL
 
 	HRESULT Window::Destroy()
 	{
-		//NotifyWindowDestroy(this);
 		if (mHGLRC)
 		{
 			wglDeleteContext(mHGLRC);
@@ -142,21 +126,6 @@ namespace PIL
 		mIsClosed = true;
 		mUserWindow = NULL;
 		return S_OK;
-	}
-
-	void Window::NotifyWindowDestroy(const Window* w)
-	{
-		IWindowEventListenerList::iterator it = mListenerList.begin();
-		while (it != mListenerList.end())
-		{
-			IWindowEventListener* listener = (*it);
-			if (listener != NULL)
-			{
-				listener->OnDestroy(w);
-			}
-			it++;
-		}
-		mListenerList.clear();
 	}
 
 	HRESULT Window::InitPixelFormat()
@@ -196,85 +165,27 @@ namespace PIL
 		}
 	}
 
-	void Window::OnActiveChange(const Window* w, bool bActive)
+	void Window::OnUpdateDimension()
 	{
-		if (w == this && mHWnd != NULL)
+		if (mHWnd)
 		{
-			mIsActive = bActive;
-			NotifyActiveChange(bActive);
-		}
-	}
+			RECT rect;
+			GetWindowRect(mHWnd, &rect);
 
-	void Window::NotifyActiveChange(bool active)
-	{
-		IWindowEventListenerList::iterator it = mListenerList.begin();
-		while (it != mListenerList.end())
-		{
-			IWindowEventListener* listener = (*it);
-			if (listener != NULL)
+			if (mLeft != rect.left || mTop != rect.top)
 			{
-				listener->OnSetActive(this, active);
+				mLeft = rect.left;
+				mTop = rect.top;
 			}
-			it++;
-		}
-	}
 
-	void Window::OnMoveOrResize(const Window *w)
-	{
-		if (w == this)
-		{
-			if (mHWnd)
+			GetClientRect(mHWnd, &rect);
+			uint32 newWidth = rect.right - rect.left;
+			uint32 newHeight = rect.bottom - rect.top;
+			if (mWidth != newWidth || mHeight != newHeight)
 			{
-				RECT rect;
-				GetWindowRect(mHWnd, &rect);
-
-				if (mLeft != rect.left || mTop != rect.top)
-				{
-					Point oldPos(mLeft, mTop);
-					mLeft = rect.left;
-					mTop = rect.top;
-					NotifyWindowMove(oldPos, Point(rect.left, rect.top));
-				}
-
-				GetClientRect(mHWnd, &rect);
-				uint32 newWidth = rect.right - rect.left;
-				uint32 newHeight = rect.bottom - rect.top;
-				if (mWidth != newWidth || mHeight != newHeight)
-				{
-					Point oldSize(mWidth, mHeight);
-					mWidth = rect.right - rect.left;
-					mHeight = rect.bottom - rect.top;
-					NotifyWindowResize(oldSize, Point(newWidth, newHeight));
-				}
+				mWidth = rect.right - rect.left;
+				mHeight = rect.bottom - rect.top;
 			}
-		}
-	}
-
-	void Window::NotifyWindowMove(const Point& oldPos, const Point& newPos)
-	{
-		IWindowEventListenerList::iterator it = mListenerList.begin();
-		while (it != mListenerList.end())
-		{
-			IWindowEventListener* listener = (*it);
-			if (listener != NULL)
-			{
-				listener->OnWindowMove(this, oldPos, newPos);
-			}
-			it++;
-		}
-	}
-
-	void Window::NotifyWindowResize(const Size& oldSize, const Size& newSize)
-	{
-		IWindowEventListenerList::iterator it = mListenerList.begin();
-		while (it != mListenerList.end())
-		{
-			IWindowEventListener* listener = (*it);
-			if (listener != NULL)
-			{
-				listener->OnWindowResize(this, oldSize, newSize);
-			}
-			it++;
 		}
 	}
 
@@ -410,28 +321,6 @@ namespace PIL
 	{
 		::SwapBuffers(mHDC);
 		return S_OK;
-	}
-
-	void Window::AddListener(IWindowEventListener* listener)
-	{
-		if (listener == NULL)
-			return;
-		IWindowEventListenerList::iterator it = std::find(mListenerList.begin(), mListenerList.end(), listener);
-		if (it == mListenerList.end())
-		{
-			mListenerList.push_back(listener);
-		}
-	}
-
-	void Window::RemoveListener(IWindowEventListener* listener)
-	{
-		if (listener == NULL)
-			return;
-		IWindowEventListenerList::iterator it = std::find(mListenerList.begin(), mListenerList.end(), listener);
-		if (it != mListenerList.end())
-		{
-			mListenerList.erase(it);
-		}
 	}
 
 	void Window::BindUserWindow(WindowObject* window)
