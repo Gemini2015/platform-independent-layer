@@ -146,7 +146,7 @@ namespace PIL
 			return S_OK;
 		int res = SendMessage(w->mHWnd, WM_CLOSE, 0, 0);
 		//int res = PostMessage(w->mHWnd, WM_CLOSE, 0, 0);
-		return res != 0 ? S_OK : E_FAIL;
+		return res == 0 ? S_OK : E_FAIL;	// return 0 in WindowProc
 	}
 
 	HRESULT WindowManager::DeleteWindow(Window* window)
